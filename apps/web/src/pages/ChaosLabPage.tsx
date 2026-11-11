@@ -218,7 +218,7 @@ export const ChaosLabPage: React.FC = () => {
             className="flex items-center gap-2 rounded-md bg-neutral-900 px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-neutral-800 disabled:opacity-50"
           >
             <Play className={`h-3.5 w-3.5 fill-current ${running ? 'animate-pulse' : ''}`} />
-            <span>{running ? 'Executing Suite...' : 'Run Chaos Suite'}</span>
+            <span>{running ? (progress ? `Executing (${progress.completed}/${progress.total})...` : 'Executing Suite...') : 'Run Chaos Suite'}</span>
           </button>
         </div>
       </div>
