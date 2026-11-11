@@ -75,12 +75,21 @@ export async function workspaceRoutes(fastify: FastifyInstance): Promise<void> {
     return reply.send({ workspace: ws });
   });
 
-  // Update workspace
+  // Update workspace with strict ownership check
   fastify.patch('/api/workspaces/:id', { preHandler: [requireAuth] }, async (req, reply) => {
     const { id } = req.params as { id: string };
     const user = req.user!;
 
     if (user.isGuest && user.workspaceId !== id) {
+      return reply.status(403).send({ error: 'Forbidden', message: 'Access to foreign workspace denied' });
+    }
+
+    const existing = await db.workspace.findUnique({ where: { id } });
+    if (!existing) {
+      return reply.status(404).send({ error: 'Workspace Not Found' });
+    }
+
+    if (!user.isGuest && existing.ownerId !== user.userId) {
       return reply.status(403).send({ error: 'Forbidden', message: 'Access to foreign workspace denied' });
     }
 

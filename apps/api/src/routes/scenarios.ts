@@ -144,6 +144,8 @@ export async function scenarioRoutes(fastify: FastifyInstance, io: SocketIOServe
         },
       );
 
+      const isSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL?.startsWith('postgresql');
+
       // Store TestRun in database
       const testRun = await db.testRun.create({
         data: {
@@ -160,7 +162,7 @@ export async function scenarioRoutes(fastify: FastifyInstance, io: SocketIOServe
           latencyP95: report.latencyStats.p95,
           latencyMax: report.latencyStats.max,
           allPassed: report.allPassed,
-          reportJson: report as any,
+          reportJson: isSqlite ? JSON.stringify(report) : (report as any),
           testResults: {
             create: report.assertions.map((a) => ({
               assertionId: a.assertionId,
@@ -184,7 +186,9 @@ export async function scenarioRoutes(fastify: FastifyInstance, io: SocketIOServe
 
       return reply.send({
         success: true,
+        id: testRun.id,
         testRunId: testRun.id,
+        scenarioId: scenario.id,
         report,
       });
     } catch (err: unknown) {

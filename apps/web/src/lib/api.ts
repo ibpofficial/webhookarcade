@@ -37,6 +37,13 @@ export const api = {
   register: (data: any) => apiFetch<any>('/api/auth/register', { method: 'POST', body: JSON.stringify(data) }),
   login: (data: any) => apiFetch<any>('/api/auth/login', { method: 'POST', body: JSON.stringify(data) }),
 
+  // Signature Verification
+  verifySignature: (id: string, data: { secret: string; scheme?: string; signatureHeader?: string }) =>
+    apiFetch<{ valid: boolean; scheme: string; computedSignature: string; receivedSignature: string; error?: string }>(
+      `/api/events/${id}/verify-signature`,
+      { method: 'POST', body: JSON.stringify(data) },
+    ),
+
   // Endpoints
   listEndpoints: () => apiFetch<{ endpoints: any[] }>('/api/endpoints'),
   createEndpoint: (data: any) => apiFetch<{ endpoint: any }>('/api/endpoints', { method: 'POST', body: JSON.stringify(data) }),
@@ -44,6 +51,7 @@ export const api = {
   updateEndpoint: (id: string, data: any) => apiFetch<{ endpoint: any }>(`/api/endpoints/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   updateResponseRules: (id: string, rules: any) => apiFetch<{ rule: any }>(`/api/endpoints/${id}/rules`, { method: 'PUT', body: JSON.stringify(rules) }),
   deleteEndpoint: (id: string) => apiFetch<any>(`/api/endpoints/${id}`, { method: 'DELETE' }),
+  purgeEndpointEvents: (id: string) => apiFetch<{ success: boolean; count: number; message: string }>(`/api/endpoints/${id}/events`, { method: 'DELETE' }),
 
   // Events
   listEvents: (params: Record<string, any> = {}) => {

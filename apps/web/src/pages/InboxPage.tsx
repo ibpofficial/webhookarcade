@@ -26,8 +26,35 @@ export const InboxPage: React.FC = () => {
 
   // Signature check tester state
   const [secretInput, setSecretInput] = useState('');
+  const [customHeaderInput, setCustomHeaderInput] = useState('');
   const [sigScheme, setSigScheme] = useState<'github' | 'stripe' | 'generic-sha256'>('github');
+  const [verifyingSig, setVerifyingSig] = useState(false);
   const [sigResult, setSigResult] = useState<any | null>(null);
+
+  const handleVerifySignature = async () => {
+    if (!selectedEvent) return;
+    if (!secretInput.trim()) {
+      setSigResult({ valid: false, error: 'Please enter a signing secret.' });
+      return;
+    }
+    setVerifyingSig(true);
+    setSigResult(null);
+    try {
+      const res = await api.verifySignature(selectedEvent.id, {
+        secret: secretInput.trim(),
+        scheme: sigScheme,
+        signatureHeader: customHeaderInput.trim() || undefined,
+      });
+      setSigResult(res);
+    } catch (err: unknown) {
+      setSigResult({
+        valid: false,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    } finally {
+      setVerifyingSig(false);
+    }
+  };
 
   // Fetch initial events list
   const loadEvents = async () => {
@@ -435,40 +462,60 @@ export const InboxPage: React.FC = () => {
                       <label className="text-xs font-medium text-neutral-700">Signing Secret</label>
                       <input
                         type="password"
-                        placeholder="whsec_..."
+                        placeholder="whsec_... or your secret key"
                         value={secretInput}
                         onChange={(e) => setSecretInput(e.target.value)}
                         className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900"
                       />
                     </div>
 
+                    <div>
+                      <label className="text-xs font-medium text-neutral-700">
+                        Signature Header Value (Optional — auto-read from event headers if left blank)
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. sha256=... or t=...,v1=..."
+                        value={customHeaderInput}
+                        onChange={(e) => setCustomHeaderInput(e.target.value)}
+                        className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-1.5 font-mono text-[11px] text-neutral-900"
+                      />
+                    </div>
+
                     <button
-                      onClick={() => {
-                        if (!secretInput) {
-                          setSigResult({ valid: false, error: 'Please enter a signing secret' });
-                          return;
-                        }
-                        setSigResult({
-                          valid: true,
-                          computed: 'sha256=verified_valid_signature_hash',
-                          message: 'HMAC signature matches payload bytes perfectly.',
-                        });
-                      }}
-                      className="rounded-md bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
+                      onClick={handleVerifySignature}
+                      disabled={verifyingSig}
+                      className="rounded-md bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800 disabled:opacity-50 transition-colors"
                     >
-                      Verify Signature
+                      {verifyingSig ? 'Verifying with Cryptographic Engine...' : 'Verify Cryptographic Signature'}
                     </button>
 
                     {sigResult && (
                       <div
-                        className={`rounded-lg p-3 text-xs ${
+                        className={`rounded-lg p-3 text-xs space-y-1.5 ${
                           sigResult.valid
                             ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
                             : 'bg-rose-50 border border-rose-200 text-rose-800'
                         }`}
                       >
-                        <p className="font-semibold">{sigResult.valid ? 'Signature Valid' : 'Verification Failed'}</p>
-                        <p className="mt-1">{sigResult.message || sigResult.error}</p>
+                        <p className="font-bold flex items-center gap-1.5">
+                          {sigResult.valid ? '✔ Cryptographic Signature Valid' : '✖ Signature Verification Failed'}
+                        </p>
+                        {sigResult.error && <p className="font-mono text-[11px]">{sigResult.error}</p>}
+                        {sigResult.computedSignature && (
+                          <div className="pt-1 font-mono text-[10px] space-y-1">
+                            <div>
+                              <span className="font-semibold text-neutral-600">Expected / Computed:</span>
+                              <div className="break-all bg-white/70 p-1 rounded border border-neutral-200">{sigResult.computedSignature}</div>
+                            </div>
+                            {sigResult.receivedSignature && (
+                              <div>
+                                <span className="font-semibold text-neutral-600">Received Header:</span>
+                                <div className="break-all bg-white/70 p-1 rounded border border-neutral-200">{sigResult.receivedSignature}</div>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

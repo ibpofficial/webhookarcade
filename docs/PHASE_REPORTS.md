@@ -13,16 +13,6 @@ This document records the empirical verification evidence, test execution logs, 
   - Dual database architecture supporting PostgreSQL in production and SQLite in zero-dependency local development environments.
   - Design tokens established combining Apple HIG ergonomics with Material Design 3 semantic token roles.
 
-### Verification Evidence:
-```bash
-$ npx tsc --version
-Version 5.9.3
-
-$ pnpm -v
-11.24.0
-```
-- All package TypeScript builds exited with code 0.
-
 ---
 
 ## Phase 1: Functional Foundation Verification
@@ -33,21 +23,6 @@ $ pnpm -v
   - Public receiver route (`ANY /ingest/:endpointToken`) capturing raw bytes, sanitizing sensitive headers (`authorization`, `cookie`, `x-api-key`), parsing JSON, and storing events.
   - Real-time Socket.IO event broadcasting to workspace rooms.
   - Three-pane Webhook Inbox with live search, method filters, and full payload inspection.
-
-### Verification Evidence (Integration Test Suite):
-```bash
-$ npx vitest run apps/api/tests/api.test.ts
-
- RUN  v3.2.7 D:/metad/webhook/webhook-arcade/apps/api
-
- ✓ tests/api.test.ts (3 tests) 861ms
-   ✓ Webhook Arcade API Integration & Access Control > generates an endpoint in 1 click via guest auth
-   ✓ Webhook Arcade API Integration & Access Control > receives and captures a real webhook via /ingest/:token
-   ✓ Webhook Arcade API Integration & Access Control > enforces strict workspace isolation: Workspace A cannot read Workspace B data
-
- Test Files  1 passed (1)
-      Tests  3 passed (3)
-```
 
 ---
 
@@ -60,28 +35,6 @@ $ npx vitest run apps/api/tests/api.test.ts
   - Side-by-side response status and body diffing.
   - Response Simulator configurable per endpoint.
 
-### Verification Evidence (SSRF Test Suite):
-```bash
-$ npx vitest run packages/replay-engine/tests/ssrf.test.ts
-
- RUN  v3.2.7 D:/metad/webhook/webhook-arcade/packages/replay-engine
-
- ✓ tests/ssrf.test.ts (12 tests) 5ms
-   ✓ SSRF Protection Engine & IP Parser > parseIPv4ToNumber format conversions (dot-decimal, octal, hex, dword)
-   ✓ SSRF Protection Engine & IP Parser > validateTargetUrl security blocks
-     ✓ blocks loopback 127.0.0.1 and variations
-     ✓ blocks 0.0.0.0
-     ✓ blocks IPv6 loopback [::1]
-     ✓ blocks RFC 1918 private IPv4 ranges (10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16)
-     ✓ blocks Cloud Metadata service (169.254.169.254, hex 0xa9fea9fe)
-     ✓ blocks non-HTTP protocols (file, ftp, gopher)
-     ✓ allows localhost when explicit allowLocalhost flag is enabled
-     ✓ allows public Internet IP addresses
-
- Test Files  1 passed (1)
-      Tests  12 passed (12)
-```
-
 ---
 
 ## Phase 3: Chaos Lab & Assertions Verification
@@ -93,66 +46,125 @@ $ npx vitest run packages/replay-engine/tests/ssrf.test.ts
   - Automated assertions engine (status equals, latency below threshold, JSONPath matching, idempotency verification).
   - Built-in Demo Target server with `/demo/naive` and `/demo/idempotent` endpoints.
 
-### Verification Evidence (Chaos Engine & Demo Target Suite):
+---
+
+## Phase 4: Open-Source Launch Verification (Pre-Audit State)
+- **Status**: AUDITED & COMPLETED IN PHASE 5
+- **Date**: 2026-11-11
+- **Audit Findings**:
+  - Initial implementation contained mock behavior: CLI `login`, `events`, `replay`, and `listen` were stubbed; Inbox signature verification returned simulated output; Settings purge action was a stub.
+  - All findings documented with file and line citations in [`docs/AUDIT_PHASE5.md`](./AUDIT_PHASE5.md) and systematically resolved.
+
+---
+
+## Phase 5: Trust & Core Reliability Audit
+- **Status**: COMPLETED & VERIFIED
+- **Date**: 2026-11-11
+- **Audit Document**: [`docs/AUDIT_PHASE5.md`](./AUDIT_PHASE5.md)
+- **Key Enhancements Delivered**:
+  1. **Socket.IO Hardening**: Strict handshake authentication rejecting unauthenticated connections; web origin CORS enforcement; token-derived workspace rooms; server-side database verification for `join:endpoint` rejecting cross-tenant room snooping.
+  2. **Fortified SSRF Protection**: Full 16-bit word IPv6 address parser handling dot-decimal and hexadecimal IPv4-mapped notation (`::ffff:7f00:1`), NAT64 (`64:ff9b::/96`), 6to4 (`2002::/16`), documentation (`2001:db8::/32`), and uncompressed formats. Multi-hop redirect validation with per-hop SSRF checking.
+  3. **Ingestion & Token Integrity**: Removed `tokenPrefix` ingestion bypass; required full secret token with constant-time `crypto.timingSafeEqual` comparison against stored SHA256 hashes; per-endpoint rate limits; rate limiting on guest creation (20/min per IP); verified raw unmodified byte storage.
+  4. **Guest Session Claiming Verification**: Required active guest JWT in `Authorization` header during registration to claim an existing guest workspace, preventing unauthenticated workspace takeovers.
+  5. **Real Implementations (Zero Fakes)**:
+     - Real signature verification API route (`POST /api/events/:id/verify-signature`) using `@webhook-arcade/signatures` against stored raw bytes; UI updated to call it.
+     - Real endpoint event history purge (`DELETE /api/endpoints/:id/events`); UI updated with real purge action.
+     - Real CLI: `login` with config storage in `~/.arcade/config.json` (`0600`), real `endpoint list/create`, real `events` pagination and formatting, real `replay` with diff and latency, and resilient `listen` local forwarding.
+     - Real side-by-side original vs replayed response diff viewer with status, headers, body, and latency comparison.
+     - Removed hardcoded fallback metrics from Overview and Analytics pages.
+
+---
+
+### Phase 5 Empirical Verification Evidence
+
+#### 1. Full Monorepo Turborepo Suite (19/19 Tasks Successful)
 ```bash
-$ npx vitest run packages/chaos-engine/tests/chaos.test.ts
+$ pnpm test
+   • turbo 2.11.10
+   • Packages in scope: @webhook-arcade/api, @webhook-arcade/chaos-engine, @webhook-arcade/cli, @webhook-arcade/database, @webhook-arcade/replay-engine, @webhook-arcade/shared, @webhook-arcade/signatures, @webhook-arcade/templates, @webhook-arcade/web, @webhook-arcade/webhook-engine
+   • Running test in 10 packages
 
- RUN  v3.2.7 D:/metad/webhook/webhook-arcade/packages/chaos-engine
+@webhook-arcade/signatures:test: ✓ tests/signatures.test.ts (4 tests) 4ms
+@webhook-arcade/webhook-engine:test: ✓ tests/engine.test.ts (4 tests) 9ms
+@webhook-arcade/replay-engine:test: ✓ tests/ssrf.test.ts (13 tests) 18ms
+@webhook-arcade/chaos-engine:test: ✓ tests/chaos.test.ts (2 tests) 88ms
+@webhook-arcade/cli:test: ✓ tests/cli.test.ts (2 tests) 3069ms
+@webhook-arcade/api:test: ✓ tests/socket.test.ts (4 tests) 696ms
+@webhook-arcade/api:test: ✓ tests/replay_chaos.test.ts (3 tests) 1001ms
+@webhook-arcade/api:test: ✓ tests/api.test.ts (6 tests) 1174ms
+@webhook-arcade/web:test: No test files found (e2e segregated), exiting with code 0
 
- ✓ tests/chaos.test.ts (2 tests) 100ms
-   ✓ Chaos Engine & Demo Target > generates reproducible sequences with SeededRNG
-   ✓ Chaos Engine & Demo Target > runs duplicate chaos scenario against idempotent demo target with passing assertions
+ Tasks:    19 successful, 19 total
+Cached:    17 cached, 19 total
+  Time:    20.338s 
+```
+
+#### 2. API Integration, Security & Isolation Suite (13/13 Passing)
+```bash
+$ vitest run apps/api
+ ✓ tests/socket.test.ts (4 tests) 696ms
+   ✓ Socket.IO Authentication & Authorization Suite > rejects socket connection when handshake token is missing
+   ✓ Socket.IO Authentication & Authorization Suite > rejects socket connection when handshake token is invalid or expired
+   ✓ Socket.IO Authentication & Authorization Suite > authenticates valid token, auto-assigns workspace room, and receives live events
+   ✓ Socket.IO Authentication & Authorization Suite > enforces room authorization: rejects foreign endpoint room joins
+ ✓ tests/replay_chaos.test.ts (3 tests) 1001ms
+   ✓ Replay Engine & Chaos Lab Integration Suite > replays an event to a real destination, captures response comparison, and records delivery
+   ✓ Replay Engine & Chaos Lab Integration Suite > prevents cross-workspace replay execution
+   ✓ Replay Engine & Chaos Lab Integration Suite > executes a chaos scenario and evaluates assertions against target server
+ ✓ tests/api.test.ts (6 tests) 1174ms
+   ✓ Webhook Arcade API Integration, Security & Core Reliability > generates an endpoint in 1 click via guest auth
+   ✓ Webhook Arcade API Integration, Security & Core Reliability > strictly validates full endpoint token and rejects tokenPrefix spoofing
+   ✓ Webhook Arcade API Integration, Security & Core Reliability > ingests malformed JSON without crashing and stores raw bytes correctly
+   ✓ Webhook Arcade API Integration, Security & Core Reliability > performs real cryptographic signature verification against raw stored bytes
+   ✓ Webhook Arcade API Integration, Security & Core Reliability > purges all events for an endpoint via DELETE /api/endpoints/:id/events
+   ✓ Webhook Arcade API Integration, Security & Core Reliability > enforces strict cross-tenant workspace isolation across every API route
+
+ Test Files  3 passed (3)
+      Tests  13 passed (13)
+```
+
+#### 3. CLI Integration Suite (Real Process & Server Spawning)
+```bash
+$ vitest run apps/cli
+ ✓ tests/cli.test.ts (2 tests) 1796ms
+   ✓ CLI Integration Suite (Real Server Spawning) > prints CLI help information and exit code 0
+   ✓ CLI Integration Suite (Real Server Spawning) > authenticates via arcade login and manages endpoints and events
 
  Test Files  1 passed (1)
       Tests  2 passed (2)
 ```
 
----
-
-## Phase 4: Open-Source Launch Verification
-- **Status**: COMPLETED
-- **Date**: 2026-11-11
-- **Deliverables**:
-  - Arcade CLI (`apps/cli`) with commands: `login`, `endpoint create`, `listen --to <url>`, `events`, and `replay <id>`.
-  - Production React dashboard bundle via Vite (`dist/index.html`, `dist/assets/`).
-  - Docker Compose packaging (`docker-compose.yml`, `docker/Dockerfile.api`, `docker/Dockerfile.web`).
-  - GitHub Actions CI pipeline (`.github/workflows/ci.yml`).
-  - Complete documentation suite and open-source hygiene (`CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md`, `LICENSE`, `CHANGELOG.md`).
-
-### Verification Evidence (CLI Execution):
+#### 4. Playwright End-to-End Workflow Verification
 ```bash
-$ node apps/cli/dist/index.js --help
-Usage: arcade [options] [command]
+$ pnpm --filter @webhook-arcade/web run test:e2e
+Running 1 test using 1 worker
+  ok 1 [chromium] › e2e\workflow.spec.ts:4:3 › Webhook Arcade Core End-to-End Workflow › creates endpoint, ingests webhook live over socket, replays, and inspects comparison (1.1s)
 
-Webhook Arcade CLI - Reliability playground in your terminal
-
-Commands:
-  login [options]              Authenticate CLI with Webhook Arcade
-  endpoint [options] <action>  Endpoint management commands
-  listen [options]             Forward captured webhooks in real-time to a local server
-  events [options]             List recently captured webhook events
-  replay [options] <eventId>   Replay a historical webhook event to a destination URL
+  1 passed (2.1s)
 ```
-
-### Verification Evidence (Frontend Production Build):
-```bash
-$ npx vite build
-✓ 2122 modules transformed.
-dist/index.html                   1.09 kB │ gzip:   0.61 kB
-dist/assets/index-C8mXnznM.css   42.65 kB │ gzip:   7.98 kB
-dist/assets/index-CVl_xbsV.js   898.57 kB │ gzip: 263.58 kB
-✓ built in 24.35s
-```
+- **Flow Verified**: Landing page -> 1-click sandbox creation -> endpoint generated -> real HTTP webhook ingestion -> live Socket.IO update in inbox list -> detail view with raw payload -> navigate to Replay -> dispatch replay to target -> response comparison with status, headers diff, and latency.
 
 ---
 
-## Anti-Slop & Design Review Summary
+## Remaining Known Limitations
 
-- **Design Review**:
-  - The UI uses Apple HIG layout architecture (information-dense 3-pane split view, dark navy canvas `#0a0d14`, calm surfaces `#161c2e`, electric violet `#8b5cf6`, cyan accent `#06b6d4`, Inter typography).
-  - Material 3 interaction tokens provide high-contrast `focus-visible` rings and WCAG AA compliance.
-  - Motion is purposeful and strictly adheres to `prefers-reduced-motion`.
-- **Anti-Slop Audit**:
-  - All interactive elements (composer, replay, signature check, preset buttons, cURL copiers) are wired to real logic.
-  - Zero placeholder strings, fake testimonials, or fabricated statistics.
-  - Clean developer copywriting without unnecessary em-dashes (`—`).
+1. **SQLite Database Locking Under Extreme Write Concurrency**:
+   - While SQLite is ideal for zero-dependency local developer sandboxes, file lock contention can occur under high-throughput concurrent bursts (>500 req/sec). Production deployments should always set `DATABASE_URL` to a pooled PostgreSQL instance.
+2. **Synchronous Replay Job Execution**:
+   - Outbound replay requests currently execute synchronously via Fastify before recording the delivery record. In multi-tenant scale with slow external receivers, configuring BullMQ with a Redis instance (`REDIS_URL`) is recommended to prevent worker thread saturation.
+3. **Public Ingest URL Host Header Dependency**:
+   - When running behind certain reverse proxies, `PUBLIC_INGEST_URL` must be explicitly configured in `.env` to prevent the UI from displaying `localhost:4000` to external webhook senders.
+
+---
+
+## Updated Roadmap from Real State
+
+- **v0.2.0**:
+  - Native asynchronous background workers via BullMQ / Redis for out-of-process replay workers and scheduled chaos campaigns.
+  - Multi-endpoint simultaneous forwarding in the CLI (`arcade listen --all`).
+- **v0.3.0**:
+  - OpenTelemetry / Prometheus exporter for webhook ingestion latency and delivery success rates.
+  - Automated signature rotation drills in Chaos Lab.
+- **v1.0.0**:
+  - Team collaboration with Role-Based Access Control (Admin, Developer, Viewer).
+  - Enterprise SSO (SAML 2.0 / OIDC) and audit logging for security compliance.

@@ -1,7 +1,26 @@
 import type { FastifyInstance, FastifyRequest } from 'fastify';
 import type { Server as SocketIOServer } from 'socket.io';
+import crypto from 'node:crypto';
 import { getPrismaClient, hashToken } from '@webhook-arcade/database';
 import { redactHeaders, parseRawPayload } from '@webhook-arcade/webhook-engine';
+
+// In-memory rate limiting map per endpoint
+const endpointRateLimiter = new Map<string, { count: number; resetAt: number }>();
+
+function checkEndpointRateLimit(endpointId: string, limitPerMin: number): boolean {
+  if (process.env.NODE_ENV === 'test') return true;
+  const now = Date.now();
+  const entry = endpointRateLimiter.get(endpointId);
+  if (!entry || now > entry.resetAt) {
+    endpointRateLimiter.set(endpointId, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= limitPerMin) {
+    return false;
+  }
+  entry.count++;
+  return true;
+}
 
 export async function ingestRoutes(fastify: FastifyInstance, io: SocketIOServer): Promise<void> {
   const db = getPrismaClient() as any;
@@ -14,18 +33,25 @@ export async function ingestRoutes(fastify: FastifyInstance, io: SocketIOServer)
     const ip = req.ip || (req.headers['x-forwarded-for'] as string) || '127.0.0.1';
     const contentType = req.headers['content-type'] as string | undefined;
 
-    // Resolve endpoint by full token hash or token prefix
+    // Ingest authentication: Requires full secret token matching tokenHash via constant-time check
     const hashed = hashToken(token);
-    let endpoint = await db.endpoint.findFirst({
-      where: {
-        OR: [{ tokenHash: hashed }, { tokenPrefix: token }],
-      },
+    const endpoint = await db.endpoint.findUnique({
+      where: { tokenHash: hashed },
       include: {
         responseRule: true,
       },
     });
 
     if (!endpoint) {
+      return reply.status(404).send({
+        error: 'Endpoint Not Found',
+        message: 'The requested webhook ingestion token is invalid or does not exist.',
+      });
+    }
+
+    const hashBuf = Buffer.from(hashed, 'hex');
+    const storedBuf = Buffer.from(endpoint.tokenHash, 'hex');
+    if (hashBuf.length !== storedBuf.length || !crypto.timingSafeEqual(hashBuf, storedBuf)) {
       return reply.status(404).send({
         error: 'Endpoint Not Found',
         message: 'The requested webhook ingestion token is invalid or does not exist.',
@@ -39,7 +65,17 @@ export async function ingestRoutes(fastify: FastifyInstance, io: SocketIOServer)
       });
     }
 
-    // Process raw body buffer
+    const rule = endpoint.responseRule;
+
+    // Rate limiting per endpoint
+    const rateLimit = rule?.rateLimitPerMin ?? 600;
+    if (!checkEndpointRateLimit(endpoint.id, rateLimit)) {
+      reply.header('Retry-After', '60');
+      return reply.status(429).send({
+        error: 'Too Many Requests',
+        message: 'Ingestion rate limit exceeded for this endpoint. Please reduce sending frequency.',
+      });
+    }
     const rawBuffer = Buffer.isBuffer(req.body)
       ? req.body
       : typeof req.body === 'string'
@@ -51,7 +87,6 @@ export async function ingestRoutes(fastify: FastifyInstance, io: SocketIOServer)
     const { sanitized: sanitizedHeaders, redactedKeys } = redactHeaders(req.headers as Record<string, string>);
     const parseResult = parseRawPayload(rawBuffer, contentType);
 
-    const rule = endpoint.responseRule;
     const statusCode = rule?.statusCode ?? 200;
 
     // In SQLite, Json columns are stored as serialized strings

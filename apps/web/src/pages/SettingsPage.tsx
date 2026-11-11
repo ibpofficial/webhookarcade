@@ -18,6 +18,26 @@ export const SettingsPage: React.FC = () => {
   const [savingRules, setSavingRules] = useState(false);
   const [rulesSaved, setRulesSaved] = useState(false);
 
+  // Purge State
+  const [purging, setPurging] = useState(false);
+  const [purgeMessage, setPurgeMessage] = useState<string | null>(null);
+
+  const handlePurgeEvents = async () => {
+    if (!activeEndpoint) return;
+    if (!confirm('Are you sure you want to permanently delete all captured events for this endpoint?')) return;
+    setPurging(true);
+    setPurgeMessage(null);
+    try {
+      const res = await api.purgeEndpointEvents(activeEndpoint.id);
+      setPurgeMessage(`Successfully purged ${res.count} events.`);
+      setTimeout(() => setPurgeMessage(null), 3500);
+    } catch (err: unknown) {
+      alert(err instanceof Error ? err.message : 'Failed to purge events');
+    } finally {
+      setPurging(false);
+    }
+  };
+
   const handleClaim = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!claimEmail || !claimPassword) return;
@@ -193,17 +213,19 @@ export const SettingsPage: React.FC = () => {
           </h3>
         </div>
         <p className="text-xs text-neutral-600">
-          Delete endpoint history and purge captured events from the database.
+          Permanently delete all captured events and deliveries for this endpoint from the database.
         </p>
+        {purgeMessage && (
+          <p className="text-xs font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 p-2 rounded">
+            {purgeMessage}
+          </p>
+        )}
         <button
-          onClick={() => {
-            if (confirm('Are you sure you want to purge event history?')) {
-              window.location.reload();
-            }
-          }}
-          className="rounded-md border border-rose-300 bg-white px-3 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 transition-colors"
+          onClick={handlePurgeEvents}
+          disabled={purging || !activeEndpoint}
+          className="rounded-md border border-rose-300 bg-white px-3.5 py-1.5 text-xs font-medium text-rose-700 hover:bg-rose-50 disabled:opacity-50 transition-colors"
         >
-          Purge Event History
+          {purging ? 'Purging History...' : 'Purge Event History'}
         </button>
       </div>
     </div>

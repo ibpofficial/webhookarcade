@@ -4,9 +4,6 @@ export const SENSITIVE_HEADERS = [
   'set-cookie',
   'x-api-key',
   'x-auth-token',
-  'stripe-signature',
-  'x-hub-signature-256',
-  'x-shopify-hmac-sha256',
   'secret',
   'proxy-authorization',
 ] as const;

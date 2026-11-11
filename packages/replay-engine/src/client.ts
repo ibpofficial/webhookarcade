@@ -9,6 +9,9 @@ export interface DispatchRequestOptions extends SSRFValidationOptions {
   body?: string;
   timeoutMs?: number;
   maxResponseSizeBytes?: number;
+  followRedirects?: boolean;
+  maxRedirects?: number;
+  redirectCount?: number;
 }
 
 export interface DispatchResponseResult {
@@ -94,7 +97,7 @@ export async function dispatchReplayRequest(
           chunks.push(chunk);
         });
 
-        res.on('end', () => {
+        res.on('end', async () => {
           const latencyMs = Math.round(performance.now() - startTime);
           const body = Buffer.concat(chunks).toString('utf8');
 
@@ -105,8 +108,38 @@ export async function dispatchReplayRequest(
             }
           }
 
+          const statusCode = res.statusCode ?? 0;
+          const location = responseHeaders['location'];
+
+          // If followRedirects is enabled and status is a redirect
+          if (
+            options.followRedirects &&
+            location &&
+            [301, 302, 303, 307, 308].includes(statusCode)
+          ) {
+            const currentCount = options.redirectCount ?? 0;
+            const maxRedirects = options.maxRedirects ?? 3;
+            if (currentCount >= maxRedirects) {
+              reject(new Error(`Exceeded maximum redirect limit of ${maxRedirects}`));
+              return;
+            }
+
+            try {
+              const redirectUrl = new URL(location, targetUrl).toString();
+              const redirectResult = await dispatchReplayRequest(redirectUrl, {
+                ...options,
+                redirectCount: currentCount + 1,
+              });
+              resolve(redirectResult);
+              return;
+            } catch (err: unknown) {
+              reject(err);
+              return;
+            }
+          }
+
           resolve({
-            statusCode: res.statusCode ?? 0,
+            statusCode,
             statusText: res.statusMessage ?? '',
             headers: responseHeaders,
             body,

@@ -41,7 +41,7 @@ export const AnalyticsPage: React.FC = () => {
         <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
           <span className="text-xs text-neutral-500 font-medium">p95 Latency</span>
           <p className="mt-1 text-2xl font-bold text-neutral-900">
-            {data?.latencyStats?.p95 || 35}ms
+            {data?.latencyStats?.p95 !== undefined ? `${data.latencyStats.p95}ms` : '0ms'}
           </p>
         </div>
       </div>

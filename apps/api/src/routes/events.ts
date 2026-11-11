@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { getPrismaClient } from '@webhook-arcade/database';
 import { listEventsQuerySchema, sendManualEventSchema } from '@webhook-arcade/shared';
 import { dispatchReplayRequest } from '@webhook-arcade/replay-engine';
+import { verifySignature } from '@webhook-arcade/signatures';
 import { requireAuth } from '../auth.js';
 
 export async function eventRoutes(fastify: FastifyInstance): Promise<void> {
@@ -135,7 +136,7 @@ export async function eventRoutes(fastify: FastifyInstance): Promise<void> {
       // ignore
     }
 
-    const rawString = event.rawBody ? event.rawBody.toString('utf8') : '';
+    const rawString = event.rawBody ? Buffer.from(event.rawBody).toString('utf8') : '';
     let parsedBody = event.parsedBody;
     if (typeof parsedBody === 'string') {
       try {
@@ -232,5 +233,64 @@ export async function eventRoutes(fastify: FastifyInstance): Promise<void> {
 
     await db.event.delete({ where: { id } });
     return reply.send({ success: true, message: 'Event deleted from history' });
+  });
+
+  // Verify cryptographic signature against stored raw body bytes
+  fastify.post('/api/events/:id/verify-signature', { preHandler: [requireAuth] }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const workspaceId = req.workspaceId!;
+
+    const event = await db.event.findUnique({
+      where: { id },
+      include: { endpoint: true },
+    });
+
+    if (!event || event.endpoint.workspaceId !== workspaceId) {
+      return reply.status(404).send({ error: 'Event Not Found' });
+    }
+
+    const body = (req.body as any) || {};
+    const secret = body.secret;
+    if (!secret || typeof secret !== 'string') {
+      return reply.status(400).send({ error: 'Bad Request', message: 'Missing signing secret' });
+    }
+
+    const scheme = body.scheme || 'github';
+    let signatureHeader = body.signatureHeader;
+
+    if (!signatureHeader) {
+      let headers: Record<string, string> = {};
+      try {
+        headers = JSON.parse(event.headersJson || '{}');
+      } catch {
+        // ignore
+      }
+
+      if (scheme === 'github') {
+        signatureHeader = headers['x-hub-signature-256'] || headers['x-hub-signature'];
+      } else if (scheme === 'stripe') {
+        signatureHeader = headers['stripe-signature'];
+      } else {
+        signatureHeader = headers['x-signature-sha256'] || headers['x-signature'] || headers['x-hub-signature-256'];
+      }
+    }
+
+    if (!signatureHeader) {
+      return reply.status(400).send({
+        error: 'Bad Request',
+        message: `No signature header found in event headers for scheme "${scheme}". Provide signatureHeader explicitly or dispatch webhook with expected signature header.`,
+      });
+    }
+
+    const rawPayload = event.rawBody ? Buffer.from(event.rawBody) : Buffer.alloc(0);
+    const result = verifySignature(rawPayload, signatureHeader, secret, scheme);
+
+    return reply.send({
+      valid: result.valid,
+      scheme: result.scheme,
+      computedSignature: result.computedSignature,
+      receivedSignature: result.receivedSignature,
+      error: result.error,
+    });
   });
 }

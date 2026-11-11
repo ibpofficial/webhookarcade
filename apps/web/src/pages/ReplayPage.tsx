@@ -142,15 +142,15 @@ export const ReplayPage: React.FC = () => {
                 {/* Metric Summary Cards */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-                    <span className="text-[11px] text-neutral-500">Original Response</span>
+                    <span className="text-[11px] text-neutral-500">Original Ingest</span>
                     <div className="mt-1 flex items-center justify-between">
                       <span className="font-mono text-sm font-bold text-neutral-900">HTTP {comparison.originalStatus}</span>
-                      <span className="text-xs text-neutral-500">{comparison.originalLatencyMs || 50}ms</span>
+                      <span className="text-xs text-neutral-500">{comparison.originalLatencyMs !== undefined ? `${comparison.originalLatencyMs}ms` : 'Recorded'}</span>
                     </div>
                   </div>
 
                   <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3">
-                    <span className="text-[11px] text-neutral-500">Replayed Response</span>
+                    <span className="text-[11px] text-neutral-500">Replayed Destination</span>
                     <div className="mt-1 flex items-center justify-between">
                       <span className="font-mono text-sm font-bold text-neutral-900">
                         HTTP {comparison.replayedStatus}
@@ -161,9 +161,9 @@ export const ReplayPage: React.FC = () => {
                 </div>
 
                 {/* Diff Viewer */}
-                <div className="space-y-1.5">
+                <div className="space-y-3">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-neutral-500 font-medium">Body Match Status</span>
+                    <span className="text-neutral-500 font-medium">Body Comparison & Diff</span>
                     {comparison.bodyDiff?.isIdentical ? (
                       <span className="flex items-center gap-1 text-emerald-700 font-semibold">
                         <Check className="h-3 w-3 text-emerald-600" /> Identical Body
@@ -175,9 +175,34 @@ export const ReplayPage: React.FC = () => {
                     )}
                   </div>
 
-                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs text-neutral-900 overflow-x-auto max-h-60">
-                    <pre className="whitespace-pre-wrap">{comparison.bodyDiff?.replayed || '<Empty Response Body>'}</pre>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Original Body</span>
+                      <div className="mt-1 rounded-lg border border-neutral-200 bg-neutral-50 p-2.5 font-mono text-[11px] text-neutral-900 overflow-x-auto max-h-52">
+                        <pre className="whitespace-pre-wrap">{comparison.bodyDiff?.original || '<Empty Body>'}</pre>
+                      </div>
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Replayed Response Body</span>
+                      <div className="mt-1 rounded-lg border border-neutral-200 bg-neutral-50 p-2.5 font-mono text-[11px] text-neutral-900 overflow-x-auto max-h-52">
+                        <pre className="whitespace-pre-wrap">{comparison.bodyDiff?.replayed || '<Empty Body>'}</pre>
+                      </div>
+                    </div>
                   </div>
+
+                  {comparison.headers && Object.keys(comparison.headers).length > 0 && (
+                    <div className="space-y-1">
+                      <span className="text-[10px] font-semibold uppercase tracking-wider text-neutral-500">Outbound Replayed Headers</span>
+                      <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-2.5 font-mono text-[11px] text-neutral-800 overflow-x-auto max-h-36">
+                        {Object.entries(comparison.headers).map(([k, v]) => (
+                          <div key={k} className="flex gap-2">
+                            <span className="font-semibold text-neutral-600">{k}:</span>
+                            <span className="text-neutral-900">{String(v)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )

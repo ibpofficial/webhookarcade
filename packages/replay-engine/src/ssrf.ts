@@ -87,44 +87,122 @@ export function isPrivateOrReservedIPv4(ipNum: number, allowLocalhost = false): 
 }
 
 /**
- * Validates an IPv6 address against loopback, private ULA, link-local, and IPv4-mapped IPv6
+ * Parses any standard, uncompressed, or IPv4-embedded IPv6 address into eight 16-bit words.
  */
-export function isPrivateOrReservedIPv6(ipStr: string, allowLocalhost = false): boolean {
-  const normalized = ipStr.toLowerCase().trim();
+export function parseIPv6ToWords(ipStr: string): number[] | null {
+  const clean = ipStr.replace(/^\[|\]$/g, '').trim().toLowerCase();
+  if (!clean) return null;
 
-  // ::1 loopback
-  if (normalized === '::1' || normalized === '0:0:0:0:0:0:0:1') {
-    return !allowLocalhost;
-  }
+  let v4Words: number[] = [];
+  let v6Str = clean;
 
-  // :: unspecified
-  if (normalized === '::' || normalized === '0:0:0:0:0:0:0:0') {
-    return true;
-  }
-
-  // IPv4-mapped IPv6: ::ffff:192.168.1.1 or ::ffff:7f00:1
-  if (normalized.startsWith('::ffff:')) {
-    const v4Part = normalized.replace('::ffff:', '');
-    if (net.isIPv4(v4Part)) {
-      const parsedNum = parseIPv4ToNumber(v4Part);
-      if (parsedNum !== null) {
-        return isPrivateOrReservedIPv4(parsedNum, allowLocalhost);
-      }
+  // Check for embedded IPv4 at the end (e.g., ::ffff:192.168.1.1 or ::127.0.0.1)
+  const lastColon = clean.lastIndexOf(':');
+  if (lastColon !== -1) {
+    const possibleV4 = clean.substring(lastColon + 1);
+    if (possibleV4.includes('.')) {
+      const v4Num = parseIPv4ToNumber(possibleV4);
+      if (v4Num === null) return null;
+      v4Words = [(v4Num >>> 16) & 0xffff, v4Num & 0xffff];
+      v6Str = clean.substring(0, lastColon);
     }
   }
 
-  // Unique Local Address (ULA) fc00::/7 (fc00... or fd00...)
-  if (/^f[cd][0-9a-f]{2}:/i.test(normalized)) {
+  const parts = v6Str.split('::');
+  if (parts.length > 2) return null;
+
+  const leftParts = parts[0] ? parts[0].split(':').filter(Boolean) : [];
+  const rightParts = parts.length === 2 && parts[1] ? parts[1].split(':').filter(Boolean) : [];
+
+  const totalSpecified = leftParts.length + rightParts.length + v4Words.length;
+  if (parts.length === 1 && totalSpecified !== 8) return null;
+  if (parts.length === 2 && totalSpecified > 7) return null;
+
+  const leftWords: number[] = [];
+  for (const part of leftParts) {
+    if (!/^[0-9a-f]{1,4}$/i.test(part)) return null;
+    leftWords.push(parseInt(part, 16));
+  }
+
+  const rightWords: number[] = [];
+  for (const part of rightParts) {
+    if (!/^[0-9a-f]{1,4}$/i.test(part)) return null;
+    rightWords.push(parseInt(part, 16));
+  }
+
+  const missingZeros = 8 - (leftWords.length + rightWords.length + v4Words.length);
+  const zeroWords = Array(Math.max(0, missingZeros)).fill(0);
+
+  return [...leftWords, ...zeroWords, ...rightWords, ...v4Words];
+}
+
+/**
+ * Validates an IPv6 address against loopback, private ULA, link-local, and IPv4-mapped IPv6
+ */
+export function isPrivateOrReservedIPv6(ipStr: string, allowLocalhost = false): boolean {
+  const words = parseIPv6ToWords(ipStr);
+  if (!words || words.length !== 8) {
+    return true; // Malformed IPv6 treated as unsafe
+  }
+
+  const [w0, w1, w2, w3, w4, w5, w6, w7] = words;
+
+  // :: Unspecified (all zeros)
+  if (words.every((w) => w === 0)) {
     return true;
   }
 
-  // Link-local unicast fe80::/10 (fe80... to febf...)
-  if (/^fe[89ab][0-9a-f]:/i.test(normalized)) {
+  // ::1 Loopback
+  if (w0 === 0 && w1 === 0 && w2 === 0 && w3 === 0 && w4 === 0 && w5 === 0 && w6 === 0 && w7 === 1) {
+    return !allowLocalhost;
+  }
+
+  // IPv4-Mapped IPv6: ::ffff:0:0/96 (e.g. ::ffff:192.168.1.1 or ::ffff:7f00:1)
+  if (w0 === 0 && w1 === 0 && w2 === 0 && w3 === 0 && w4 === 0 && w5 === 0xffff) {
+    const ipv4Num = ((w6! << 16) | w7!) >>> 0;
+    return isPrivateOrReservedIPv4(ipv4Num, allowLocalhost);
+  }
+
+  // IPv4-Compatible IPv6 (deprecated RFC 4291): ::0:0/96
+  if (w0 === 0 && w1 === 0 && w2 === 0 && w3 === 0 && w4 === 0 && w5 === 0) {
+    const ipv4Num = ((w6! << 16) | w7!) >>> 0;
+    return isPrivateOrReservedIPv4(ipv4Num, allowLocalhost);
+  }
+
+  // NAT64 Well-Known Prefix: 64:ff9b::/96
+  if (w0 === 0x0064 && w1 === 0xff9b && w2 === 0 && w3 === 0 && w4 === 0 && w5 === 0) {
+    const ipv4Num = ((w6! << 16) | w7!) >>> 0;
+    return isPrivateOrReservedIPv4(ipv4Num, allowLocalhost);
+  }
+
+  // 6to4 Relay / Anycast: 2002::/16
+  if (w0 === 0x2002) {
+    const ipv4Num = ((w1! << 16) | w2!) >>> 0;
+    return isPrivateOrReservedIPv4(ipv4Num, allowLocalhost);
+  }
+
+  // Documentation Prefix: 2001:db8::/32
+  if (w0 === 0x2001 && w1 === 0x0db8) {
     return true;
   }
 
-  // Multicast ff00::/8
-  if (/^ff[0-9a-f]{2}:/i.test(normalized)) {
+  // Unique Local Address (ULA): fc00::/7 (fc00... to fdff...)
+  if ((w0! & 0xfe00) === 0xfc00) {
+    return true;
+  }
+
+  // Link-Local Unicast: fe80::/10 (fe80... to febf...)
+  if ((w0! & 0xffc0) === 0xfe80) {
+    return true;
+  }
+
+  // Site-Local Unicast (deprecated): fec0::/10 (fec0... to feff...)
+  if ((w0! & 0xffc0) === 0xfec0) {
+    return true;
+  }
+
+  // Multicast: ff00::/8
+  if ((w0! & 0xff00) === 0xff00) {
     return true;
   }
 

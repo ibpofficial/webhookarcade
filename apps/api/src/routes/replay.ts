@@ -63,7 +63,7 @@ export async function replayRoutes(fastify: FastifyInstance): Promise<void> {
     outboundHeaders['x-arcade-replayed'] = 'true';
     outboundHeaders['x-arcade-original-id'] = event.id;
 
-    const payloadToSend = overridePayload ?? (event.rawBody ? event.rawBody.toString('utf8') : '');
+    const payloadToSend = overridePayload ?? (event.rawBody ? Buffer.from(event.rawBody).toString('utf8') : '');
     const httpMethod = method || event.method || 'POST';
     const allowLocalhost = process.env.ALLOW_LOCALHOST_TARGETS === 'true';
 
@@ -79,8 +79,8 @@ export async function replayRoutes(fastify: FastifyInstance): Promise<void> {
       const comparison = compareResponses(
         {
           statusCode: event.statusCode,
-          body: event.rawBody ? event.rawBody.toString('utf8') : '',
-          latencyMs: 50,
+          body: event.rawBody ? Buffer.from(event.rawBody).toString('utf8') : '',
+          latencyMs: undefined,
         },
         response,
       );
@@ -99,13 +99,15 @@ export async function replayRoutes(fastify: FastifyInstance): Promise<void> {
         },
       });
 
+      const isSqlite = process.env.USE_SQLITE === 'true' || !process.env.DATABASE_URL?.startsWith('postgresql');
+
       // Record Replay Job
       await db.replayJob.create({
         data: {
           originalEventId: event.id,
           destinationUrl,
           status: 'completed',
-          resultDiff: comparison as any,
+          resultDiff: isSqlite ? JSON.stringify(comparison) : (comparison as any),
           completedAt: new Date(),
         },
       });
@@ -113,6 +115,14 @@ export async function replayRoutes(fastify: FastifyInstance): Promise<void> {
       return reply.send({
         success: true,
         deliveryId: delivery.id,
+        delivery: {
+          id: delivery.id,
+          destinationUrl,
+          method: httpMethod,
+          statusCode: response.statusCode,
+          latencyMs: response.latencyMs,
+          success: delivery.success,
+        },
         comparison,
       });
     } catch (err: unknown) {

@@ -5,6 +5,15 @@ import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import { Server as SocketIOServer } from 'socket.io';
 
+try {
+  if (process.loadEnvFile) {
+    try { process.loadEnvFile(); } catch {}
+    try { process.loadEnvFile('../../.env'); } catch {}
+  }
+} catch {
+  // ignore if .env file not present
+}
+
 import { authRoutes } from './routes/auth.js';
 import { workspaceRoutes } from './routes/workspaces.js';
 import { endpointRoutes } from './routes/endpoints.js';
@@ -16,6 +25,7 @@ import { templateRoutes } from './routes/templates.js';
 import { analyticsRoutes } from './routes/analytics.js';
 import { demoRoutes } from './routes/demo.js';
 import { verifyToken } from './auth.js';
+import { getPrismaClient } from '@webhook-arcade/database';
 
 export async function buildServer() {
   const fastify = Fastify({
@@ -36,6 +46,7 @@ export async function buildServer() {
   });
 
   // Raw buffer parser: preserves exact bytes for /ingest while parsing JSON for /api
+  fastify.removeAllContentTypeParsers();
   fastify.addContentTypeParser('*', { parseAs: 'buffer' }, (req, body, done) => {
     if (req.url.startsWith('/api/') && req.headers['content-type']?.includes('application/json')) {
       try {
@@ -84,33 +95,63 @@ export async function buildServer() {
     },
   });
 
-  // Attach Socket.IO to Fastify's raw HTTP server
+  // Attach Socket.IO to Fastify's raw HTTP server with strict CORS and handshake authentication
+  const allowedOrigins = process.env.SOCKET_CORS_ORIGIN
+    ? process.env.SOCKET_CORS_ORIGIN.split(',').map((s) => s.trim())
+    : [
+        'http://localhost:5173',
+        'http://localhost:5174',
+        'http://127.0.0.1:5173',
+        'http://127.0.0.1:5174',
+        ...(process.env.WEB_URL ? [process.env.WEB_URL] : []),
+      ];
+
   const io = new SocketIOServer(fastify.server, {
     cors: {
-      origin: '*',
+      origin: process.env.NODE_ENV === 'test' ? true : allowedOrigins,
       methods: ['GET', 'POST'],
+      credentials: true,
     },
   });
 
-  io.on('connection', (socket) => {
-    // Authenticate socket handshake or subscribe to workspace
-    const token = socket.handshake.auth.token || socket.handshake.query.token;
-    if (token && typeof token === 'string') {
-      const user = verifyToken(token);
-      if (user?.workspaceId) {
-        socket.join(`workspace_${user.workspaceId}`);
-      }
+  // Strict handshake authentication: reject unauthenticated connections
+  io.use((socket, next) => {
+    const token = (socket.handshake.auth?.token || socket.handshake.query?.token) as string | undefined;
+    if (!token || typeof token !== 'string') {
+      return next(new Error('Unauthorized: Missing or invalid authentication token in socket handshake'));
     }
 
-    socket.on('join:workspace', (workspaceId: string) => {
-      if (workspaceId) {
-        socket.join(`workspace_${workspaceId}`);
-      }
-    });
+    const user = verifyToken(token);
+    if (!user || !user.workspaceId) {
+      return next(new Error('Unauthorized: Invalid or expired session token'));
+    }
 
-    socket.on('join:endpoint', (endpointId: string) => {
-      if (endpointId) {
-        socket.join(`endpoint_${endpointId}`);
+    (socket as any).user = user;
+    next();
+  });
+
+  io.on('connection', (socket) => {
+    const user = (socket as any).user;
+    // Derive room strictly from verified token
+    socket.join(`workspace_${user.workspaceId}`);
+
+    // Authorized endpoint room join: confirms endpoint belongs to authenticated workspace
+    socket.on('join:endpoint', async (endpointId: string) => {
+      if (!endpointId || typeof endpointId !== 'string') return;
+      try {
+        const db = getPrismaClient() as any;
+        const endpoint = await db.endpoint.findUnique({
+          where: { id: endpointId },
+          select: { id: true, workspaceId: true },
+        });
+        if (endpoint && endpoint.workspaceId === user.workspaceId) {
+          socket.join(`endpoint_${endpointId}`);
+          socket.emit('joined:endpoint', { endpointId });
+        } else {
+          socket.emit('error:forbidden', { message: 'Unauthorized endpoint room access' });
+        }
+      } catch {
+        // ignore
       }
     });
   });

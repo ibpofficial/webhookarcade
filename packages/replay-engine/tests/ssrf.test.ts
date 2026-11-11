@@ -105,6 +105,27 @@ describe('SSRF Protection Engine & IP Parser', () => {
       expect(res.safe).toBe(true);
       expect(res.resolvedIp).toBe('93.184.216.34');
     });
+
+    it('blocks IPv4-mapped IPv6 and alternate notations', async () => {
+      const mappedAddresses = [
+        'http://[::ffff:127.0.0.1]/hook',
+        'http://[::ffff:7f00:1]/hook',
+        'http://[::ffff:192.168.1.1]/hook',
+        'http://[::ffff:c0a8:0101]/hook',
+        'http://[0:0:0:0:0:ffff:10.0.0.1]/hook',
+        'http://[::192.168.1.1]/hook',
+        'http://[64:ff9b::127.0.0.1]/hook',
+        'http://[2002:7f00:0001::]/hook', // 6to4 encoding 127.0.0.1
+        'http://[2001:db8::1]/hook', // documentation prefix
+        'http://[fc00::1]/hook', // ULA
+        'http://[fe80::1]/hook', // Link-local
+      ];
+
+      for (const url of mappedAddresses) {
+        const res = await validateTargetUrl(url, { allowLocalhost: false });
+        expect(res.safe, `Expected ${url} to be blocked`).toBe(false);
+      }
+    });
   });
 });
 

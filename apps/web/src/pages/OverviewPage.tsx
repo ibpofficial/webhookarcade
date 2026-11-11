@@ -105,7 +105,7 @@ export const OverviewPage: React.FC = () => {
         <div className="rounded-lg border border-neutral-200 bg-white p-4 shadow-sm">
           <span className="text-xs text-neutral-500 font-medium">Average Processing Latency</span>
           <div className="mt-1 flex items-baseline justify-between">
-            <span className="text-2xl font-extrabold text-neutral-900">{stats.avgLatencyMs || 25}ms</span>
+            <span className="text-2xl font-extrabold text-neutral-900">{stats.avgLatencyMs ? `${stats.avgLatencyMs}ms` : '0ms'}</span>
             <Clock className="h-4 w-4 text-neutral-600" />
           </div>
         </div>

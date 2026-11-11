@@ -174,5 +174,27 @@ export async function endpointRoutes(fastify: FastifyInstance): Promise<void> {
     await db.endpoint.delete({ where: { id } });
     return reply.send({ success: true, message: 'Endpoint deleted' });
   });
+
+  // Purge all events captured for this endpoint
+  fastify.delete('/api/endpoints/:id/events', { preHandler: [requireAuth] }, async (req, reply) => {
+    const { id } = req.params as { id: string };
+    const workspaceId = req.workspaceId!;
+
+    const existing = await db.endpoint.findUnique({ where: { id } });
+    if (!existing || existing.workspaceId !== workspaceId) {
+      return reply.status(404).send({ error: 'Endpoint Not Found' });
+    }
+
+    const deleted = await db.event.deleteMany({
+      where: { endpointId: id },
+    });
+
+    return reply.send({
+      success: true,
+      count: deleted.count,
+      deleted: deleted.count,
+      message: `Purged ${deleted.count} events`,
+    });
+  });
 }
 

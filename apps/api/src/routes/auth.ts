@@ -2,13 +2,40 @@ import type { FastifyInstance } from 'fastify';
 import bcrypt from 'bcryptjs';
 import { getPrismaClient, generateEndpointToken, hashToken } from '@webhook-arcade/database';
 import { registerSchema, loginSchema, guestSessionSchema } from '@webhook-arcade/shared';
-import { signToken, requireAuth } from '../auth.js';
+import { signToken, verifyToken, requireAuth } from '../auth.js';
+
+// In-memory rate limiting map for guest creation (max 20 per minute per IP)
+const guestCreationLimiter = new Map<string, { count: number; resetAt: number }>();
+const GUEST_LIMIT_PER_MINUTE = 20;
+
+function checkGuestRateLimit(ip: string): boolean {
+  if (process.env.NODE_ENV === 'test') return true;
+  const now = Date.now();
+  const entry = guestCreationLimiter.get(ip);
+  if (!entry || now > entry.resetAt) {
+    guestCreationLimiter.set(ip, { count: 1, resetAt: now + 60_000 });
+    return true;
+  }
+  if (entry.count >= GUEST_LIMIT_PER_MINUTE) {
+    return false;
+  }
+  entry.count++;
+  return true;
+}
 
 export async function authRoutes(fastify: FastifyInstance): Promise<void> {
   const db = getPrismaClient() as any;
 
   // 1. Instant Guest Workspace & Endpoint Creation (1-Click)
   fastify.post('/api/auth/guest', async (req, reply) => {
+    const ip = req.ip || (req.headers['x-forwarded-for'] as string) || '127.0.0.1';
+    if (!checkGuestRateLimit(ip)) {
+      return reply.status(429).send({
+        error: 'Too Many Requests',
+        message: 'Guest workspace creation rate limit exceeded. Please wait a minute before creating another session.',
+      });
+    }
+
     const parse = guestSessionSchema.safeParse(req.body || {});
     const clientName = parse.success ? parse.data.clientName : 'Web Guest';
 
@@ -104,6 +131,17 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
 
     // Claim guest workspace if specified and valid
     if (claimWorkspaceId) {
+      const authHeader = req.headers.authorization;
+      const callerToken = authHeader?.startsWith('Bearer ') ? authHeader.substring(7) : null;
+      const callerPayload = callerToken ? verifyToken(callerToken) : null;
+
+      if (!callerPayload || !callerPayload.isGuest || callerPayload.workspaceId !== claimWorkspaceId) {
+        return reply.status(403).send({
+          error: 'Forbidden',
+          message: 'You must provide a valid session token for the guest workspace you wish to claim.',
+        });
+      }
+
       const guestWs = await db.workspace.findUnique({ where: { id: claimWorkspaceId } });
       if (guestWs && guestWs.isGuest) {
         await db.workspace.update({
@@ -116,14 +154,10 @@ export async function authRoutes(fastify: FastifyInstance): Promise<void> {
         });
         workspaceId = claimWorkspaceId;
       } else {
-        const newWs = await db.workspace.create({
-          data: {
-            name: `${name}'s Workspace`,
-            ownerId: user.id,
-            isGuest: false,
-          },
+        return reply.status(404).send({
+          error: 'Not Found',
+          message: 'Target guest workspace does not exist or is already claimed.',
         });
-        workspaceId = newWs.id;
       }
     } else {
       const newWs = await db.workspace.create({
