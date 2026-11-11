@@ -143,3 +143,4 @@ if (process.env.RUN_SEED_DIRECTLY) {
       await prisma.$disconnect();
     });
 }
+

@@ -62,3 +62,4 @@ This document records architectural, technical, and design choices made during t
   - Layout: Apple Human Interface Guidelines desktop 3-pane split (Nav / Inbox List / Inspector) with responsive collapse to a bottom sheet/drawer on mobile.
   - Colors: Dark charcoal/navy canvas (`#0a0d14`), elevated surface (`#121826`), high-contrast text (`#f8fafc`), electric violet primary (`#8b5cf6`), and electric cyan accent (`#06b6d4`).
   - State & Accessibility: Material Design 3 token hierarchy, focus-visible outlines (2px violet/cyan offset), and WCAG AA contrast compliance across all controls.
+

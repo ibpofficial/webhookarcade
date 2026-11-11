@@ -28,3 +28,4 @@ export const updateEndpointSchema = z.object({
 export type ResponseRule = z.infer<typeof responseRuleSchema>;
 export type CreateEndpointInput = z.infer<typeof createEndpointSchema>;
 export type UpdateEndpointInput = z.infer<typeof updateEndpointSchema>;
+

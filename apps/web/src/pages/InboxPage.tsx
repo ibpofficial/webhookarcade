@@ -528,3 +528,4 @@ export const InboxPage: React.FC = () => {
     </div>
   );
 };
+

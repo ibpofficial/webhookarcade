@@ -19,3 +19,4 @@ Describe how reviewers can verify these changes:
 - [ ] Anti-slop quality gates passed (no placeholder text, no dead buttons, no fake claims)
 - [ ] All test suites pass (`pnpm test`)
 - [ ] PR adheres to Conventional Commits format
+

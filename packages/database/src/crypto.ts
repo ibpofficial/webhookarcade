@@ -59,3 +59,4 @@ export function decryptSecret(cipherPayload: string, keyHex: string): string {
   decrypted += decipher.final('utf8');
   return decrypted;
 }
+

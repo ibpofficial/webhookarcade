@@ -222,3 +222,4 @@ export async function scenarioRoutes(fastify: FastifyInstance, io: SocketIOServe
     return reply.send({ testRun });
   });
 }
+

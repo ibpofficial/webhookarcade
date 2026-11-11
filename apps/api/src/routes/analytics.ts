@@ -76,3 +76,4 @@ export async function analyticsRoutes(fastify: FastifyInstance): Promise<void> {
     });
   });
 }
+

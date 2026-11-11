@@ -195,3 +195,4 @@ export const BUILT_IN_TEMPLATES: EventTemplate[] = [
     ),
   },
 ];
+

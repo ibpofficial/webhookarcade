@@ -13,3 +13,4 @@ export const eventTemplateSchema = z.object({
 });
 
 export type EventTemplate = z.infer<typeof eventTemplateSchema>;
+

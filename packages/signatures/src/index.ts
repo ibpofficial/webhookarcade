@@ -163,3 +163,4 @@ export function generateCorruptSignature(validSignature: string): string {
   const replacement = lastChar === 'a' ? 'b' : 'a';
   return validSignature.slice(0, -1) + replacement;
 }
+

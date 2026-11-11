@@ -52,3 +52,4 @@ export async function demoRoutes(fastify: FastifyInstance): Promise<void> {
     });
   });
 }
+

@@ -73,3 +73,4 @@ export const api = {
   getAnalytics: () => apiFetch<any>('/api/analytics'),
   listTemplates: () => apiFetch<{ templates: any[] }>('/api/templates'),
 };
+

@@ -163,3 +163,4 @@ export async function replayRoutes(fastify: FastifyInstance): Promise<void> {
     return reply.send({ replays });
   });
 }
+

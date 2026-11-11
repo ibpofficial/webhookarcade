@@ -236,3 +236,4 @@ model AuditLog {
   @@index([workspaceId, createdAt])
   @@map("audit_logs")
 }
+

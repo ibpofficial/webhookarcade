@@ -32,3 +32,4 @@ export async function templateRoutes(fastify: FastifyInstance): Promise<void> {
     });
   });
 }
+

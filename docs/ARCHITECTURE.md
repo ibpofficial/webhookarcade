@@ -70,3 +70,4 @@ webhook-arcade/
    - When executing Replays or Chaos Lab runs, the destination host is resolved via DNS.
    - All resolved IP addresses are checked against private (RFC 1918), loopback, link-local, and cloud metadata (`169.254.169.254`) ranges.
    - The socket connection is pinned directly to the validated IP to prevent DNS rebinding attacks.
+

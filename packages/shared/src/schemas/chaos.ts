@@ -93,3 +93,4 @@ export interface ChaosRunReport {
   assertions: AssertionEvaluation[];
   allPassed: boolean;
 }
+

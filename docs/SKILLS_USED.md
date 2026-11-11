@@ -41,3 +41,4 @@ This document outlines the design, architectural, and quality skills integrated 
   - **No Trend-Stacking**: Avoidance of gratuitous mesh gradients, excessive glassmorphism blur, neon glow borders, or generic blueprint grids.
   - **Copywriting Hygiene**: Clear, active developer prose without artificial em-dashes (`—`) in landing copy or generic "Get Started" CTAs where specific actions like "Open Playground" or "Generate Endpoint" are appropriate.
   - **Delivery Gate Reviews**: Run at the end of each development phase to verify code and UI cleanliness.
+

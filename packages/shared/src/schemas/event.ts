@@ -45,3 +45,4 @@ export interface CapturedEventDetail extends CapturedEventSummary {
   parsedBody: unknown | null;
   replaysCount: number;
 }
+

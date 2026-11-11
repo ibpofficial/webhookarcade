@@ -175,3 +175,4 @@ export async function endpointRoutes(fastify: FastifyInstance): Promise<void> {
     return reply.send({ success: true, message: 'Endpoint deleted' });
   });
 }
+

@@ -25,3 +25,4 @@ export interface ReplayResponseComparison {
   headers: Record<string, string>;
   replayedAt: string;
 }
+

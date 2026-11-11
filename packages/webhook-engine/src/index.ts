@@ -101,3 +101,4 @@ export function generateCurlSnippet(req: {
 
   return parts.join(' \\\n');
 }
+

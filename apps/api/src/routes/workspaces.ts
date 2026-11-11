@@ -97,3 +97,4 @@ export async function workspaceRoutes(fastify: FastifyInstance): Promise<void> {
     return reply.send({ workspace: ws });
   });
 }
+

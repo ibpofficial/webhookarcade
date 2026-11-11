@@ -52,3 +52,4 @@ Webhook Arcade’s visual design combines **Apple Human Interface Guidelines (HI
 - **Touch & Click Targets**: Buttons and list items maintain a minimum 40px height for desktop and 44px for mobile viewport targets.
 - **Contrast**: All text satisfies a minimum 4.5:1 contrast ratio against dark surfaces; badges maintain at least 3:1 contrast.
 - **Reduced Motion**: All animations and transitions respect `prefers-reduced-motion: reduce`.
+

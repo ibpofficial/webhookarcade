@@ -29,3 +29,4 @@ export function subscribeToWorkspace(workspaceId: string): void {
   const s = getSocket();
   s.emit('join:workspace', workspaceId);
 }
+

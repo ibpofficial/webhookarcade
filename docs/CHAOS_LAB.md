@@ -38,3 +38,4 @@ The assertion evaluator assesses responses against test criteria:
 Webhook Arcade bundles an in-process demo receiver for instant local testing:
 - `POST /demo/naive`: Blindly processes every duplicate and fails on malformed payloads.
 - `POST /demo/idempotent`: Tracks event IDs, processes the first event, and safely deduplicates subsequent deliveries with a confirmation message.
+

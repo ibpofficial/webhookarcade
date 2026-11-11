@@ -21,3 +21,4 @@ Instead, please send a detailed vulnerability report via email to **security@web
 4. Suggested mitigation or fix, if known.
 
 We aim to acknowledge all reports within 48 hours and provide a remediation timeline within 7 business days.
+

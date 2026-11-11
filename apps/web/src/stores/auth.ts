@@ -99,3 +99,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ token: null, workspace: null, activeEndpoint: null, endpoints: [] });
   },
 }));
+

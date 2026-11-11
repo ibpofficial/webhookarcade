@@ -15,3 +15,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - **Response Simulator**: Declarative HTTP response configuration per endpoint (status, custom headers, custom body, artificial latency).
 - **Chaos Lab**: Chaos scenarios (duplicates, burst volume, out-of-order deliveries, delayed arrival, tampered signatures) with automated assertions (status, latency, JSONPath, idempotency).
 - **Arcade CLI**: Developer command line interface for authentication, endpoint management, and local event forwarding.
+

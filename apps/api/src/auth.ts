@@ -46,3 +46,4 @@ export async function requireAuth(req: FastifyRequest, reply: FastifyReply): Pro
   req.user = user;
   req.workspaceId = user.workspaceId;
 }
+
