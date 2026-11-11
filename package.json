@@ -1,0 +1,22 @@
+{
+  "name": "webhook-arcade-monorepo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Every webhook. Every event. Every possibility. One playground.",
+  "license": "MIT",
+  "packageManager": "pnpm@11.24.0",
+  "scripts": {
+    "build": "turbo run build",
+    "dev": "turbo run dev",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.8",
+    "prettier": "^3.5.3",
+    "turbo": "^2.4.4",
+    "typescript": "^5.8.2"
+  }
+}

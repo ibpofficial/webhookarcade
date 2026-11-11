@@ -1,0 +1,40 @@
+{
+  "name": "@webhook-arcade/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/server.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx watch src/server.ts",
+    "start": "node dist/server.js",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/helmet": "^11.1.1",
+    "@fastify/rate-limit": "^9.1.0",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^3.0.0",
+    "@webhook-arcade/chaos-engine": "workspace:*",
+    "@webhook-arcade/database": "workspace:*",
+    "@webhook-arcade/replay-engine": "workspace:*",
+    "@webhook-arcade/shared": "workspace:*",
+    "@webhook-arcade/signatures": "workspace:*",
+    "@webhook-arcade/templates": "workspace:*",
+    "@webhook-arcade/webhook-engine": "workspace:*",
+    "bcryptjs": "^2.4.3",
+    "fastify": "^4.26.2",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.8.1",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jsonwebtoken": "^9.0.8",
+    "@types/node": "^22.13.8",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.7"
+  }
+}

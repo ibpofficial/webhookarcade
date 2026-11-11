@@ -1,0 +1,31 @@
+{
+  "name": "@webhook-arcade/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && node -e \"const fs = require('fs'); if (fs.existsSync('src/generated')) fs.cpSync('src/generated', 'dist/generated', { recursive: true });\"",
+    "dev": "tsc --watch",
+    "prisma:generate": "prisma generate --schema=./prisma/schema.prisma",
+    "prisma:generate:sqlite": "prisma generate --schema=./prisma/schema.sqlite.prisma",
+    "db:push": "prisma db push --schema=./prisma/schema.prisma",
+    "db:push:sqlite": "prisma db push --schema=./prisma/schema.sqlite.prisma",
+    "db:seed": "node ./dist/seed.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.4.1",
+    "@webhook-arcade/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "prisma": "^6.4.1",
+    "typescript": "^5.8.2"
+  }
+}
