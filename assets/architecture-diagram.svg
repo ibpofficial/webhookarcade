@@ -1,0 +1,248 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1140 680" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="arch-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07090e"/>
+      <stop offset="50%" stop-color="#0b111d"/>
+      <stop offset="100%" stop-color="#121827"/>
+    </linearGradient>
+
+    <!-- Node Gradients -->
+    <linearGradient id="node-blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e293b"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+
+    <linearGradient id="node-violet" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2e1065"/>
+      <stop offset="100%" stop-color="#1e1b4b"/>
+    </linearGradient>
+
+    <linearGradient id="node-cyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#083344"/>
+      <stop offset="100%" stop-color="#0c2438"/>
+    </linearGradient>
+
+    <linearGradient id="node-emerald" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#064e3b"/>
+      <stop offset="100%" stop-color="#022c22"/>
+    </linearGradient>
+
+    <linearGradient id="node-rose" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#4c0519"/>
+      <stop offset="100%" stop-color="#27030e"/>
+    </linearGradient>
+
+    <!-- Glowing Lines -->
+    <linearGradient id="flow-line-1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+
+    <filter id="card-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+
+    <pattern id="arch-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+      <path d="M 30 0 L 0 0 0 30" fill="none" stroke="#172033" stroke-width="0.75" opacity="0.3"/>
+    </pattern>
+
+    <style>
+      @keyframes dash-flow {
+        from { stroke-dashoffset: 60; }
+        to { stroke-dashoffset: 0; }
+      }
+      .flow-anim {
+        stroke-dasharray: 6 6;
+        animation: dash-flow 2s linear infinite;
+      }
+      .node-text {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      }
+      .mono-text {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1140" height="680" rx="16" fill="url(#arch-bg)"/>
+  <rect width="1140" height="680" rx="16" fill="url(#arch-grid)"/>
+
+  <!-- Header Section -->
+  <g transform="translate(60, 45)">
+    <text x="0" y="0" class="node-text" font-size="11" font-weight="800" fill="#06b6d4" letter-spacing="1.5">END-TO-END DATA ARCHITECTURE</text>
+    <text x="0" y="28" class="node-text" font-size="24" font-weight="800" fill="#ffffff" letter-spacing="-0.5">Webhook Arcade System Topology & Execution Flow</text>
+  </g>
+
+  <!-- FLOW CONNECTIONS (RENDERED FIRST IN BACKGROUND) -->
+  <g fill="none" stroke-width="2">
+    <!-- Provider to Ingest -->
+    <path d="M 180 180 L 260 180" stroke="#8b5cf6" class="flow-anim"/>
+    
+    <!-- Ingest to Persistence & Gateway -->
+    <path d="M 520 180 L 600 180" stroke="url(#flow-line-1)" class="flow-anim"/>
+    <path d="M 390 260 L 390 350" stroke="#06b6d4" class="flow-anim"/>
+
+    <!-- Gateway to Clients -->
+    <path d="M 750 180 L 830 180" stroke="#06b6d4" class="flow-anim"/>
+    <path d="M 750 200 L 830 290" stroke="#06b6d4" class="flow-anim"/>
+
+    <!-- Clients to Outbound Engines -->
+    <path d="M 830 330 L 690 480" stroke="#f43f5e" class="flow-anim"/>
+    <path d="M 830 220 L 450 480" stroke="#a78bfa" class="flow-anim"/>
+
+    <!-- Engines to Target Receivers -->
+    <path d="M 570 540 L 760 540" stroke="#10b981" class="flow-anim"/>
+  </g>
+
+  <!-- 1. INBOUND WEBHOOK SOURCES (COLUMN 1) -->
+  <g transform="translate(50, 110)">
+    <rect x="0" y="0" width="130" height="140" rx="10" fill="url(#node-blue)" stroke="#334155" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="130" height="26" rx="10" fill="#1e293b"/>
+    <rect x="0" y="16" width="130" height="10" fill="#1e293b"/>
+    <text x="65" y="18" class="node-text" font-size="10.5" font-weight="700" fill="#94a3b8" text-anchor="middle">EXTERNAL SENDERS</text>
+
+    <!-- Provider items -->
+    <text x="16" y="52" class="node-text" font-size="12" font-weight="600" fill="#ffffff">🟣 Stripe</text>
+    <text x="16" y="76" class="node-text" font-size="12" font-weight="600" fill="#ffffff">🐙 GitHub</text>
+    <text x="16" y="100" class="node-text" font-size="12" font-weight="600" fill="#ffffff">🟢 Shopify</text>
+    <text x="16" y="124" class="node-text" font-size="12" font-weight="600" fill="#ffffff">⚡ Custom APIs</text>
+  </g>
+
+  <!-- 2. INGESTION ENGINE (COLUMN 2) -->
+  <g transform="translate(260, 100)">
+    <rect x="0" y="0" width="260" height="160" rx="12" fill="url(#node-violet)" stroke="#7c3aed" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="260" height="30" rx="12" fill="#4c1d95"/>
+    <rect x="0" y="18" width="260" height="12" fill="#4c1d95"/>
+    <text x="130" y="20" class="node-text" font-size="11" font-weight="800" fill="#e9d5ff" text-anchor="middle">INGESTION GATEWAY (FASTIFY)</text>
+
+    <g transform="translate(14, 46)">
+      <circle cx="6" cy="6" r="3" fill="#a78bfa"/>
+      <text x="18" y="10" class="node-text" font-size="11.5" font-weight="600" fill="#ffffff">Raw Buffer Parser (Byte-Exact)</text>
+      <text x="18" y="24" class="node-text" font-size="10" fill="#c4b5fd">Zero JSON whitespace corruption</text>
+
+      <circle cx="6" cy="38" r="3" fill="#38bdf8"/>
+      <text x="18" y="42" class="node-text" font-size="11.5" font-weight="600" fill="#ffffff">Constant-Time Token Validator</text>
+      <text x="18" y="56" class="node-text" font-size="10" fill="#c4b5fd">timingSafeEqual against SHA256</text>
+
+      <circle cx="6" cy="70" r="3" fill="#fb7185"/>
+      <text x="18" y="74" class="node-text" font-size="11.5" font-weight="600" fill="#ffffff">Sensitive Header Redaction</text>
+      <text x="18" y="88" class="node-text" font-size="10" fill="#c4b5fd">Masks auth/cookies/secrets</text>
+    </g>
+  </g>
+
+  <!-- 3. REAL-TIME SOCKET.IO GATEWAY (COLUMN 3 TOP) -->
+  <g transform="translate(600, 115)">
+    <rect x="0" y="0" width="150" height="130" rx="10" fill="url(#node-cyan)" stroke="#0284c7" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="150" height="26" rx="10" fill="#0369a1"/>
+    <rect x="0" y="16" width="150" height="10" fill="#0369a1"/>
+    <text x="75" y="18" class="node-text" font-size="10.5" font-weight="800" fill="#e0f2fe" text-anchor="middle">REAL-TIME BROADCAST</text>
+
+    <g transform="translate(12, 42)">
+      <text x="0" y="12" class="node-text" font-size="11" font-weight="700" fill="#ffffff">Socket.IO Server</text>
+      <text x="0" y="28" class="node-text" font-size="10" fill="#7dd3fc">• Handshake JWT Auth</text>
+      <text x="0" y="44" class="node-text" font-size="10" fill="#7dd3fc">• workspace_${id} Room</text>
+      <text x="0" y="60" class="node-text" font-size="10" fill="#7dd3fc">• endpoint_${id} Room</text>
+      <text x="0" y="76" class="node-text" font-size="10" fill="#34d399">• Zero Snooping Guard</text>
+    </g>
+  </g>
+
+  <!-- 4. PERSISTENCE LAYER (COLUMN 2 BOTTOM) -->
+  <g transform="translate(260, 310)">
+    <rect x="0" y="0" width="260" height="110" rx="10" fill="url(#node-blue)" stroke="#3b82f6" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="260" height="26" rx="10" fill="#1d4ed8"/>
+    <rect x="0" y="16" width="260" height="10" fill="#1d4ed8"/>
+    <text x="130" y="18" class="node-text" font-size="10.5" font-weight="800" fill="#eff6ff" text-anchor="middle">STORAGE &amp; ORM (PRISMA)</text>
+
+    <g transform="translate(14, 42)">
+      <text x="0" y="14" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">Dual Database Engine</text>
+      <text x="0" y="32" class="node-text" font-size="10.5" fill="#93c5fd">📁 SQLite: Zero-dependency local mode</text>
+      <text x="0" y="48" class="node-text" font-size="10.5" fill="#93c5fd">🐘 PostgreSQL: Multi-tenant production</text>
+      <text x="0" y="64" class="node-text" font-size="10" fill="#cbd5e1">Bytes columns preserve raw signatures</text>
+    </g>
+  </g>
+
+  <!-- 5. CONSUMER SURFACES (COLUMN 4) -->
+  <g transform="translate(830, 110)">
+    <!-- Dashboard Card -->
+    <rect x="0" y="0" width="260" height="110" rx="10" fill="url(#node-blue)" stroke="#475569" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="260" height="26" rx="10" fill="#334155"/>
+    <rect x="0" y="16" width="260" height="10" fill="#334155"/>
+    <text x="130" y="18" class="node-text" font-size="10.5" font-weight="800" fill="#f1f5f9" text-anchor="middle">REACT 18 WEB DASHBOARD</text>
+    <g transform="translate(14, 40)">
+      <text x="0" y="14" class="node-text" font-size="11" font-weight="600" fill="#ffffff">• 3-Pane Split View (Apple HIG)</text>
+      <text x="0" y="30" class="node-text" font-size="11" font-weight="600" fill="#ffffff">• Signature Verification (GitHub/Stripe)</text>
+      <text x="0" y="46" class="node-text" font-size="11" font-weight="600" fill="#ffffff">• Event Composer &amp; Templates</text>
+      <text x="0" y="62" class="node-text" font-size="11" font-weight="600" fill="#ffffff">• Replay Diff Comparison Viewer</text>
+    </g>
+
+    <!-- CLI Card -->
+    <g transform="translate(0, 130)">
+      <rect x="0" y="0" width="260" height="95" rx="10" fill="url(#node-blue)" stroke="#475569" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <rect x="0" y="0" width="260" height="26" rx="10" fill="#334155"/>
+      <rect x="0" y="16" width="260" height="10" fill="#334155"/>
+      <text x="130" y="18" class="node-text" font-size="10.5" font-weight="800" fill="#f1f5f9" text-anchor="middle">ARCADE CLI FORWARDER</text>
+      <g transform="translate(14, 40)">
+        <text x="0" y="12" class="mono-text" font-size="10.5" fill="#38bdf8">arcade listen --to &lt;url&gt;</text>
+        <text x="0" y="28" class="mono-text" font-size="10.5" fill="#38bdf8">arcade replay &lt;id&gt; --to &lt;url&gt;</text>
+        <text x="0" y="44" class="node-text" font-size="10" fill="#94a3b8">Credentials securely locked in 0600 config</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- 6. OUTBOUND TESTING ENGINES (BOTTOM ROW) -->
+  <g transform="translate(260, 460)">
+    <!-- Replay Engine -->
+    <rect x="0" y="0" width="240" height="160" rx="12" fill="url(#node-cyan)" stroke="#0ea5e9" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="240" height="30" rx="12" fill="#0284c7"/>
+    <rect x="0" y="18" width="240" height="12" fill="#0284c7"/>
+    <text x="120" y="20" class="node-text" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">SAFE REPLAY ENGINE</text>
+
+    <g transform="translate(14, 46)">
+      <text x="0" y="12" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">DNS IP-Pinning</text>
+      <text x="0" y="26" class="node-text" font-size="10" fill="#bae6fd">Blocks TOCTOU DNS rebinding</text>
+
+      <text x="0" y="48" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">16-Bit Word IPv6 Parser</text>
+      <text x="0" y="62" class="node-text" font-size="10" fill="#bae6fd">Blocks ::ffff:7f00:1, NAT64, 6to4</text>
+
+      <text x="0" y="84" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">Multi-Hop Redirect Guard</text>
+      <text x="0" y="98" class="node-text" font-size="10" fill="#bae6fd">Validates every redirect hop</text>
+    </g>
+
+    <!-- Chaos Lab Engine -->
+    <g transform="translate(260, 0)">
+      <rect x="0" y="0" width="240" height="160" rx="12" fill="url(#node-rose)" stroke="#f43f5e" stroke-width="1.5" filter="url(#card-shadow)"/>
+      <rect x="0" y="0" width="240" height="30" rx="12" fill="#e11d48"/>
+      <rect x="0" y="18" width="240" height="12" fill="#e11d48"/>
+      <text x="120" y="20" class="node-text" font-size="11" font-weight="800" fill="#ffffff" text-anchor="middle">CHAOS LAB ENGINE</text>
+
+      <g transform="translate(14, 46)">
+        <text x="0" y="12" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">Mulberry32 Seeded RNG</text>
+        <text x="0" y="26" class="node-text" font-size="10" fill="#fecdd3">100% reproducible chaos replays</text>
+
+        <text x="0" y="48" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">Fault Injection Suite</text>
+        <text x="0" y="62" class="node-text" font-size="10" fill="#fecdd3">Bursts, delays, inverted orders</text>
+
+        <text x="0" y="84" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">Signature Corruption Drill</text>
+        <text x="0" y="98" class="node-text" font-size="10" fill="#fecdd3">Tampered HMAC key testing</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- 7. TARGET RECEIVERS & ASSERTIONS (COLUMN 4 BOTTOM) -->
+  <g transform="translate(780, 485)">
+    <rect x="0" y="0" width="310" height="135" rx="12" fill="url(#node-emerald)" stroke="#059669" stroke-width="1.5" filter="url(#card-shadow)"/>
+    <rect x="0" y="0" width="310" height="30" rx="12" fill="#047857"/>
+    <rect x="0" y="18" width="310" height="12" fill="#047857"/>
+    <text x="155" y="20" class="node-text" font-size="11" font-weight="800" fill="#d1fae5" text-anchor="middle">DESTINATION TARGETS &amp; ASSERTIONS</text>
+
+    <g transform="translate(14, 44)">
+      <text x="0" y="14" class="node-text" font-size="11.5" font-weight="700" fill="#ffffff">Target Execution &amp; Verification</text>
+      <text x="0" y="32" class="node-text" font-size="10.5" fill="#a7f3d0">• Localhost Dev Server (via CLI Forwarding)</text>
+      <text x="0" y="48" class="node-text" font-size="10.5" fill="#a7f3d0">• Staging / Production Webhook Endpoints</text>
+      <text x="0" y="64" class="node-text" font-size="10.5" fill="#a7f3d0">• Built-in /demo/idempotent Target</text>
+      <text x="0" y="80" class="node-text" font-size="10" font-weight="600" fill="#34d399">✔ Automated Assertions: status, latency, idempotency</text>
+    </g>
+  </g>
+</svg>
