@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Terminal, Copy, Check, Radio, ExternalLink } from 'lucide-react';
+import { Terminal, Copy, Check } from 'lucide-react';
 
 export const CliDocsPage: React.FC = () => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -44,32 +44,32 @@ export const CliDocsPage: React.FC = () => {
   ];
 
   return (
-    <div className="flex h-full w-full flex-col overflow-y-auto p-6 space-y-6 bg-canvas">
+    <div className="flex h-full w-full flex-col overflow-y-auto p-6 space-y-6 bg-white text-neutral-900">
       <div>
         <div className="flex items-center gap-2">
-          <Terminal className="h-5 w-5 text-violet-400" />
-          <h2 className="text-lg font-bold text-white">Arcade CLI & Local Forwarding</h2>
+          <Terminal className="h-5 w-5 text-neutral-900" />
+          <h2 className="text-lg font-bold text-neutral-900">Arcade CLI & Local Forwarding</h2>
         </div>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs text-neutral-500">
           Stream incoming cloud webhooks directly into your local machine using the Arcade CLI.
         </p>
       </div>
 
       <div className="space-y-4">
         {cliCommands.map((item, idx) => (
-          <div key={idx} className="rounded-xl border border-border bg-surface p-4 space-y-2">
+          <div key={idx} className="rounded-lg border border-neutral-200 bg-white p-4 space-y-2 shadow-sm">
             <div className="flex items-center justify-between">
-              <h3 className="text-xs font-bold text-white">{item.title}</h3>
+              <h3 className="text-xs font-bold text-neutral-900">{item.title}</h3>
               <button
                 onClick={() => copyCommand(item.cmd, idx)}
-                className="flex items-center gap-1 text-[11px] text-slate-400 hover:text-white"
+                className="flex items-center gap-1 text-[11px] font-semibold text-neutral-900 hover:text-neutral-600"
               >
-                {copiedIndex === idx ? <Check className="h-3 w-3 text-emerald-400" /> : <Copy className="h-3 w-3" />}
+                {copiedIndex === idx ? <Check className="h-3 w-3 text-emerald-600" /> : <Copy className="h-3 w-3" />}
                 <span>{copiedIndex === idx ? 'Copied' : 'Copy'}</span>
               </button>
             </div>
-            <p className="text-xs text-slate-400">{item.desc}</p>
-            <div className="rounded-lg bg-black/60 p-3 font-mono text-xs text-cyan-300 overflow-x-auto">
+            <p className="text-xs text-neutral-600">{item.desc}</p>
+            <div className="rounded-md border border-neutral-200 bg-neutral-50 p-3 font-mono text-xs text-neutral-900 overflow-x-auto">
               $ {item.cmd}
             </div>
           </div>
@@ -78,4 +78,3 @@ export const CliDocsPage: React.FC = () => {
     </div>
   );
 };
-

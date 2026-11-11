@@ -8,7 +8,6 @@ import {
   Clock,
   Shuffle,
   ShieldAlert,
-  Layers,
   Zap,
 } from 'lucide-react';
 import { api } from '../lib/api.js';
@@ -191,15 +190,15 @@ export const ChaosLabPage: React.FC = () => {
   };
 
   return (
-    <div className="flex h-full w-full flex-col overflow-y-auto p-6 space-y-6 bg-canvas">
+    <div className="flex h-full w-full flex-col overflow-y-auto p-6 space-y-6 bg-white text-neutral-900">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <Flame className="h-5 w-5 text-rose-500" />
-            <h2 className="text-lg font-bold text-white">Chaos Lab</h2>
+            <Flame className="h-5 w-5 text-neutral-900" />
+            <h2 className="text-lg font-bold text-neutral-900">Chaos Lab</h2>
           </div>
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-neutral-500">
             Simulate real-world network and webhook delivery failures with automated assertion checking.
           </p>
         </div>
@@ -209,14 +208,14 @@ export const ChaosLabPage: React.FC = () => {
             type="url"
             value={destinationUrl}
             onChange={(e) => setDestinationUrl(e.target.value)}
-            className="w-72 rounded-lg border border-border bg-surface px-3 py-1.5 text-xs text-white"
+            className="w-72 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900 focus-visible:outline-none"
             placeholder="Target URL..."
           />
 
           <button
             onClick={handleRunChaos}
             disabled={running}
-            className="flex items-center gap-2 rounded-lg bg-rose-600 px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-rose-500 disabled:opacity-50"
+            className="flex items-center gap-2 rounded-md bg-neutral-900 px-5 py-2 text-xs font-semibold text-white transition-colors hover:bg-neutral-800 disabled:opacity-50"
           >
             <Play className={`h-3.5 w-3.5 fill-current ${running ? 'animate-pulse' : ''}`} />
             <span>{running ? 'Executing Suite...' : 'Run Chaos Suite'}</span>
@@ -234,21 +233,21 @@ export const ChaosLabPage: React.FC = () => {
             <button
               key={preset.id}
               onClick={() => setActivePreset(preset.id as any)}
-              className={`flex flex-col text-left p-3.5 rounded-xl border transition-all ${
+              className={`flex flex-col text-left p-3.5 rounded-lg border transition-all ${
                 isSelected
-                  ? 'border-rose-500 bg-rose-950/20 shadow-md'
-                  : 'border-border bg-surface hover:border-slate-600'
+                  ? 'border-neutral-900 bg-neutral-100 shadow-sm'
+                  : 'border-neutral-200 bg-white hover:border-neutral-400'
               }`}
             >
               <div
-                className={`flex h-8 w-8 items-center justify-center rounded-lg ${
-                  isSelected ? 'bg-rose-600 text-white' : 'bg-surface-muted text-slate-400'
+                className={`flex h-8 w-8 items-center justify-center rounded-md ${
+                  isSelected ? 'bg-neutral-900 text-white' : 'bg-neutral-100 text-neutral-700'
                 }`}
               >
                 <Icon className="h-4 w-4" />
               </div>
-              <span className="mt-3 text-xs font-bold text-white">{preset.name}</span>
-              <p className="mt-1 text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+              <span className="mt-3 text-xs font-bold text-neutral-900">{preset.name}</span>
+              <p className="mt-1 text-[11px] text-neutral-500 line-clamp-2 leading-relaxed">
                 {preset.desc}
               </p>
             </button>
@@ -261,24 +260,24 @@ export const ChaosLabPage: React.FC = () => {
         <div className="space-y-6">
           {/* Executive Summary Card */}
           <div
-            className={`rounded-xl border p-5 ${
+            className={`rounded-lg border p-5 shadow-sm ${
               report.allPassed
-                ? 'border-emerald-500/30 bg-emerald-950/20'
-                : 'border-rose-500/30 bg-rose-950/20'
+                ? 'border-emerald-200 bg-emerald-50'
+                : 'border-rose-200 bg-rose-50'
             }`}
           >
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 {report.allPassed ? (
-                  <CheckCircle2 className="h-6 w-6 text-emerald-400" />
+                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                 ) : (
-                  <XCircle className="h-6 w-6 text-rose-400" />
+                  <XCircle className="h-6 w-6 text-rose-600" />
                 )}
                 <div>
-                  <h3 className="text-sm font-bold text-white">
+                  <h3 className="text-sm font-bold text-neutral-900">
                     {report.allPassed ? 'All Chaos Assertions Passed' : 'Chaos Assertions Failed'}
                   </h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-neutral-600">
                     Completed {report.totalDeliveries} deliveries in {report.durationMs}ms
                   </p>
                 </div>
@@ -286,44 +285,44 @@ export const ChaosLabPage: React.FC = () => {
 
               <div className="flex gap-4 text-xs font-mono">
                 <div>
-                  <span className="text-slate-500">Min:</span> <span className="text-white">{report.latencyStats.min}ms</span>
+                  <span className="text-neutral-500">Min:</span> <span className="font-bold text-neutral-900">{report.latencyStats.min}ms</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Avg:</span> <span className="text-white">{report.latencyStats.avg}ms</span>
+                  <span className="text-neutral-500">Avg:</span> <span className="font-bold text-neutral-900">{report.latencyStats.avg}ms</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">p95:</span> <span className="text-white">{report.latencyStats.p95}ms</span>
+                  <span className="text-neutral-500">p95:</span> <span className="font-bold text-neutral-900">{report.latencyStats.p95}ms</span>
                 </div>
                 <div>
-                  <span className="text-slate-500">Max:</span> <span className="text-white">{report.latencyStats.max}ms</span>
+                  <span className="text-neutral-500">Max:</span> <span className="font-bold text-neutral-900">{report.latencyStats.max}ms</span>
                 </div>
               </div>
             </div>
           </div>
 
           {/* Assertions Evaluation Table */}
-          <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="rounded-lg border border-neutral-200 bg-white p-5 space-y-3 shadow-sm">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
               Assertion Evaluation Matrix
             </h4>
 
-            <div className="divide-y divide-border-subtle">
+            <div className="divide-y divide-neutral-200">
               {report.assertions.map((a: any) => (
                 <div key={a.assertionId} className="flex items-center justify-between py-2.5 text-xs">
                   <div className="flex items-center gap-2.5">
                     {a.passed ? (
-                      <CheckCircle2 className="h-4 w-4 text-emerald-400" />
+                      <CheckCircle2 className="h-4 w-4 text-emerald-600" />
                     ) : (
-                      <XCircle className="h-4 w-4 text-rose-400" />
+                      <XCircle className="h-4 w-4 text-rose-600" />
                     )}
-                    <span className="text-slate-200">{a.description}</span>
+                    <span className="text-neutral-900 font-medium">{a.description}</span>
                   </div>
 
                   <div className="flex items-center gap-4 text-[11px] font-mono">
-                    {a.actual && <span className="text-slate-400">Actual: {String(a.actual)}</span>}
+                    {a.actual && <span className="text-neutral-500">Actual: {String(a.actual)}</span>}
                     <span
-                      className={`rounded px-1.5 py-0.5 font-bold ${
-                        a.passed ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                      className={`rounded px-1.5 py-0.5 font-bold border ${
+                        a.passed ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'
                       }`}
                     >
                       {a.passed ? 'PASSED' : 'FAILED'}
@@ -335,26 +334,26 @@ export const ChaosLabPage: React.FC = () => {
           </div>
 
           {/* Deliveries Timeline */}
-          <div className="rounded-xl border border-border bg-surface p-5 space-y-3">
-            <h4 className="text-xs font-semibold uppercase tracking-wider text-slate-300">
+          <div className="rounded-lg border border-neutral-200 bg-white p-5 space-y-3 shadow-sm">
+            <h4 className="text-xs font-semibold uppercase tracking-wider text-neutral-500">
               Deliveries Timeline ({report.deliveries.length})
             </h4>
 
-            <div className="divide-y divide-border-subtle">
+            <div className="divide-y divide-neutral-200">
               {report.deliveries.map((del: any) => (
                 <div key={del.attemptId} className="flex items-center justify-between py-2 text-xs">
                   <div className="flex items-center gap-3">
-                    <span className="font-mono text-[11px] text-slate-400">{del.attemptId}</span>
-                    <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] text-slate-300">
+                    <span className="font-mono text-[11px] text-neutral-500">{del.attemptId}</span>
+                    <span className="rounded border border-neutral-200 bg-neutral-50 px-1.5 py-0.5 text-[10px] text-neutral-700">
                       {del.stepType}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-4 font-mono text-[11px]">
-                    <span className="text-slate-400">{del.latencyMs}ms</span>
+                    <span className="text-neutral-500">{del.latencyMs}ms</span>
                     <span
                       className={`font-bold ${
-                        del.success ? 'text-emerald-400' : 'text-rose-400'
+                        del.success ? 'text-emerald-700' : 'text-rose-700'
                       }`}
                     >
                       HTTP {del.statusCode || 'ERR'}
@@ -366,11 +365,10 @@ export const ChaosLabPage: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="rounded-xl border border-border bg-surface p-12 text-center text-xs text-slate-500">
+        <div className="rounded-lg border border-neutral-200 bg-neutral-50/50 p-12 text-center text-xs text-neutral-400">
           Select a chaos scenario preset above and click "Run Chaos Suite" to inspect failure resilience.
         </div>
       )}
     </div>
   );
 };
-

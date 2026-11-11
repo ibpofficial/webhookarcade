@@ -1,16 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import {
   Search,
-  RotateCcw,
   Copy,
   Check,
-  ShieldCheck,
-  Code2,
-  ListFilter,
-  ArrowRight,
   Terminal,
-  Activity,
-  GitFork,
 } from 'lucide-react';
 import { ReactFlow, Background, Controls, type Node, type Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -27,7 +20,6 @@ export const InboxPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [methodFilter, setMethodFilter] = useState('ALL');
-  const [statusFilter, setStatusFilter] = useState('ALL');
   const [activeTab, setActiveTab] = useState<'body' | 'headers' | 'query' | 'signature' | 'flow' | 'replays'>('body');
   const [viewRawBody, setViewRawBody] = useState(false);
   const [copiedCurl, setCopiedCurl] = useState(false);
@@ -108,72 +100,75 @@ export const InboxPage: React.FC = () => {
     setTimeout(() => setCopiedCurl(false), 2000);
   };
 
-  // React Flow Diagram Nodes & Edges
+  // React Flow Diagram Nodes & Edges (Clean neutral professional styling)
   const flowNodes: Node[] = [
     {
       id: '1',
       position: { x: 50, y: 80 },
       data: { label: 'Webhook Provider\n(Stripe / GitHub / Custom)' },
       style: {
-        background: '#161c2e',
-        color: '#f8fafc',
-        border: '1px solid #3b82f6',
+        background: '#ffffff',
+        color: '#09090b',
+        border: '1px solid #d4d4d8',
         borderRadius: '8px',
         fontSize: '11px',
+        fontWeight: '500',
         padding: '10px',
-        width: 140,
+        width: 150,
       },
     },
     {
       id: '2',
-      position: { x: 250, y: 80 },
+      position: { x: 260, y: 80 },
       data: { label: 'Webhook Arcade\n(Capture & Redaction)' },
       style: {
-        background: '#1c243b',
-        color: '#a78bfa',
-        border: '1px solid #8b5cf6',
+        background: '#09090b',
+        color: '#ffffff',
+        border: '1px solid #09090b',
         borderRadius: '8px',
         fontSize: '11px',
+        fontWeight: '600',
         padding: '10px',
-        width: 140,
+        width: 150,
       },
     },
     {
       id: '3',
-      position: { x: 450, y: 80 },
+      position: { x: 470, y: 80 },
       data: { label: 'Your Local Receiver\n(Destination API)' },
       style: {
-        background: '#161c2e',
-        color: '#22d3ee',
-        border: '1px solid #06b6d4',
+        background: '#ffffff',
+        color: '#09090b',
+        border: '1px solid #d4d4d8',
         borderRadius: '8px',
         fontSize: '11px',
+        fontWeight: '500',
         padding: '10px',
-        width: 140,
+        width: 150,
       },
     },
   ];
 
   const flowEdges: Edge[] = [
-    { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: '#8b5cf6' } },
-    { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: '#06b6d4' } },
+    { id: 'e1-2', source: '1', target: '2', animated: true, style: { stroke: '#71717a' } },
+    { id: 'e2-3', source: '2', target: '3', animated: true, style: { stroke: '#71717a' } },
   ];
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
+    <div className="flex h-full w-full overflow-hidden bg-white text-neutral-900">
       {/* Middle Pane: Event Feed */}
-      <div className="flex w-full md:w-80 lg:w-96 flex-col border-r border-border-subtle bg-canvas-subtle">
+      <div className="flex w-full md:w-80 lg:w-96 flex-col border-r border-neutral-200 bg-neutral-50/50">
         {/* Search & Method Filter Bar */}
-        <div className="border-b border-border-subtle p-3 space-y-2">
+        <div className="border-b border-neutral-200 p-3 space-y-2 bg-white">
           <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-500" />
+            <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-neutral-400" />
             <input
               type="text"
               placeholder="Search payloads, paths, headers..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && loadEvents()}
-              className="w-full rounded-md border border-border bg-surface pl-8 pr-3 py-1.5 text-xs text-white placeholder-slate-500 focus-visible:ring-1"
+              className="w-full rounded-md border border-neutral-300 bg-white pl-8 pr-3 py-1.5 text-xs text-neutral-900 placeholder-neutral-400 focus-visible:ring-1 focus-visible:outline-none"
             />
           </div>
 
@@ -185,8 +180,8 @@ export const InboxPage: React.FC = () => {
                   onClick={() => setMethodFilter(m)}
                   className={`rounded px-2 py-0.5 text-[11px] font-medium transition-colors ${
                     methodFilter === m
-                      ? 'bg-violet-600 text-white'
-                      : 'bg-surface text-slate-400 hover:text-white'
+                      ? 'bg-neutral-900 text-white'
+                      : 'border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900'
                   }`}
                 >
                   {m}
@@ -194,26 +189,26 @@ export const InboxPage: React.FC = () => {
               ))}
             </div>
 
-            <span className="text-[11px] text-slate-500">
+            <span className="text-[11px] text-neutral-500 font-medium">
               {events.length} event{events.length === 1 ? '' : 's'}
             </span>
           </div>
         </div>
 
         {/* Live List Items */}
-        <div className="flex-1 overflow-y-auto divide-y divide-border-subtle">
+        <div className="flex-1 overflow-y-auto divide-y divide-neutral-200">
           {loading && events.length === 0 ? (
-            <div className="p-8 text-center text-xs text-slate-500">Loading events...</div>
+            <div className="p-8 text-center text-xs text-neutral-500">Loading events...</div>
           ) : events.length === 0 ? (
             <div className="p-8 text-center space-y-3">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-surface text-slate-400">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-600">
                 <Terminal className="h-5 w-5" />
               </div>
-              <p className="text-xs font-medium text-slate-300">No events captured yet</p>
-              <p className="text-[11px] leading-relaxed text-slate-500">
+              <p className="text-xs font-semibold text-neutral-800">No events captured yet</p>
+              <p className="text-[11px] leading-relaxed text-neutral-500">
                 Send an HTTP request to your endpoint URL to see it stream live into this view.
               </p>
-              <div className="rounded border border-border bg-black/40 p-2 font-mono text-[10px] text-violet-300 text-left overflow-x-auto">
+              <div className="rounded border border-neutral-200 bg-white p-2.5 font-mono text-[10px] text-neutral-800 text-left overflow-x-auto">
                 curl -X POST "{activeEndpoint?.url}" \<br />
                 &nbsp;&nbsp;-d '{`{"hello":"world"}`}'
               </div>
@@ -230,44 +225,44 @@ export const InboxPage: React.FC = () => {
                   onClick={() => setSelectedEventId(ev.id)}
                   className={`flex cursor-pointer flex-col p-3 transition-colors ${
                     isSelected
-                      ? 'bg-violet-950/30 border-l-2 border-violet-500'
-                      : 'hover:bg-surface/40'
+                      ? 'bg-neutral-100 border-l-2 border-neutral-900'
+                      : 'hover:bg-neutral-100/60'
                   }`}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-1.5">
                       <span
-                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
+                        className={`rounded px-1.5 py-0.5 text-[10px] font-bold border ${
                           ev.method === 'POST'
-                            ? 'bg-emerald-500/20 text-emerald-300'
+                            ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
                             : ev.method === 'GET'
-                            ? 'bg-blue-500/20 text-blue-300'
-                            : 'bg-amber-500/20 text-amber-300'
+                            ? 'bg-blue-50 text-blue-800 border-blue-200'
+                            : 'bg-amber-50 text-amber-800 border-amber-200'
                         }`}
                       >
                         {ev.method}
                       </span>
-                      <span className="font-mono text-xs font-semibold text-slate-200 truncate max-w-[150px]">
+                      <span className="font-mono text-xs font-semibold text-neutral-900 truncate max-w-[150px]">
                         {ev.path}
                       </span>
                     </div>
 
                     <span
-                      className={`text-[10px] font-semibold ${
+                      className={`text-[10px] font-bold ${
                         ev.statusCode >= 200 && ev.statusCode < 300
-                          ? 'text-emerald-400'
+                          ? 'text-emerald-700'
                           : ev.statusCode >= 400
-                          ? 'text-rose-400'
-                          : 'text-amber-400'
+                          ? 'text-rose-700'
+                          : 'text-amber-700'
                       }`}
                     >
                       {ev.statusCode}
                     </span>
                   </div>
 
-                  <div className="mt-2 flex items-center justify-between text-[11px] text-slate-500">
+                  <div className="mt-2 flex items-center justify-between text-[11px] text-neutral-500 font-mono">
                     <span>{timeStr}</span>
-                    <span className="font-mono">{ev.sizeBytes} B</span>
+                    <span>{ev.sizeBytes} B</span>
                   </div>
                 </div>
               );
@@ -277,19 +272,19 @@ export const InboxPage: React.FC = () => {
       </div>
 
       {/* Right Pane: Event Inspector */}
-      <div className="hidden md:flex flex-1 flex-col overflow-hidden bg-canvas">
+      <div className="hidden md:flex flex-1 flex-col overflow-hidden bg-white">
         {selectedEvent ? (
           <>
             {/* Inspector Header */}
-            <div className="flex h-14 items-center justify-between border-b border-border-subtle bg-surface/30 px-6">
+            <div className="flex h-14 items-center justify-between border-b border-neutral-200 bg-white px-6">
               <div className="flex items-center gap-3">
-                <span className="rounded bg-emerald-500/20 px-2 py-0.5 text-xs font-bold text-emerald-300">
+                <span className="rounded border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-bold text-emerald-800">
                   {selectedEvent.method}
                 </span>
-                <span className="font-mono text-sm font-semibold text-white">
+                <span className="font-mono text-sm font-semibold text-neutral-900">
                   {selectedEvent.path}
                 </span>
-                <span className="rounded bg-black/40 px-2 py-0.5 text-xs text-slate-400">
+                <span className="rounded border border-neutral-200 bg-neutral-100 px-2 py-0.5 text-xs text-neutral-700 font-medium">
                   HTTP {selectedEvent.statusCode}
                 </span>
               </div>
@@ -297,16 +292,16 @@ export const InboxPage: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handleCopyCurl}
-                  className="flex items-center gap-1.5 rounded border border-border bg-surface px-3 py-1.5 text-xs font-medium text-slate-300 hover:text-white transition-colors"
+                  className="flex items-center gap-1.5 rounded-md border border-neutral-300 bg-white px-3 py-1.5 text-xs font-medium text-neutral-800 hover:bg-neutral-50 transition-colors"
                 >
-                  {copiedCurl ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                  {copiedCurl ? <Check className="h-3.5 w-3.5 text-emerald-600" /> : <Copy className="h-3.5 w-3.5" />}
                   <span>{copiedCurl ? 'Copied cURL' : 'Copy cURL'}</span>
                 </button>
               </div>
             </div>
 
             {/* Inspector Navigation Tabs */}
-            <div className="flex border-b border-border-subtle bg-canvas-subtle px-6">
+            <div className="flex border-b border-neutral-200 bg-neutral-50/60 px-6">
               {[
                 { id: 'body', label: 'Payload Body' },
                 { id: 'headers', label: `Headers (${Object.keys(selectedEvent.headers || {}).length})` },
@@ -320,8 +315,8 @@ export const InboxPage: React.FC = () => {
                   onClick={() => setActiveTab(tab.id as any)}
                   className={`border-b-2 px-4 py-2.5 text-xs font-medium transition-colors ${
                     activeTab === tab.id
-                      ? 'border-violet-500 text-white font-semibold'
-                      : 'border-transparent text-slate-400 hover:text-slate-200'
+                      ? 'border-neutral-900 text-neutral-900 font-semibold'
+                      : 'border-transparent text-neutral-500 hover:text-neutral-900'
                   }`}
                 >
                   {tab.label}
@@ -330,26 +325,26 @@ export const InboxPage: React.FC = () => {
             </div>
 
             {/* Tab Body */}
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 bg-white">
               {activeTab === 'body' && (
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-slate-400">
+                    <span className="text-xs text-neutral-600 font-medium">
                       {selectedEvent.isInvalidJson ? (
-                        <span className="text-amber-400 font-semibold">Malformed JSON Payload</span>
+                        <span className="text-amber-700 font-semibold">Malformed JSON Payload</span>
                       ) : (
                         'Valid JSON Payload'
                       )}
                     </span>
                     <button
                       onClick={() => setViewRawBody(!viewRawBody)}
-                      className="rounded border border-border px-2.5 py-1 text-[11px] text-slate-400 hover:text-white"
+                      className="rounded border border-neutral-300 bg-white px-2.5 py-1 text-[11px] font-medium text-neutral-700 hover:bg-neutral-50"
                     >
                       {viewRawBody ? 'Pretty View' : 'Raw View'}
                     </button>
                   </div>
 
-                  <div className="rounded-lg border border-border bg-surface-muted p-4 font-mono text-xs text-slate-200 overflow-x-auto">
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-4 font-mono text-xs text-neutral-900 overflow-x-auto">
                     <pre className="whitespace-pre-wrap">
                       {viewRawBody
                         ? selectedEvent.rawBody
@@ -362,21 +357,21 @@ export const InboxPage: React.FC = () => {
               )}
 
               {activeTab === 'headers' && (
-                <div className="rounded-lg border border-border bg-surface overflow-hidden">
+                <div className="rounded-lg border border-neutral-200 bg-white overflow-hidden">
                   <table className="w-full text-left text-xs font-mono">
-                    <thead className="border-b border-border bg-surface-muted text-slate-400">
+                    <thead className="border-b border-neutral-200 bg-neutral-50 text-neutral-700">
                       <tr>
                         <th className="py-2.5 px-4 font-semibold">Header Key</th>
                         <th className="py-2.5 px-4 font-semibold">Value</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-border text-slate-300">
+                    <tbody className="divide-y divide-neutral-200 text-neutral-800">
                       {Object.entries(selectedEvent.headers || {}).map(([key, val]) => (
                         <tr key={key}>
-                          <td className="py-2 px-4 font-medium text-violet-300">{key}</td>
+                          <td className="py-2 px-4 font-semibold text-neutral-900">{key}</td>
                           <td className="py-2 px-4 break-all">
                             {val === '[REDACTED]' ? (
-                              <span className="rounded bg-rose-500/20 px-1.5 py-0.5 text-[10px] text-rose-300 font-sans">
+                              <span className="rounded border border-rose-200 bg-rose-50 px-1.5 py-0.5 text-[10px] text-rose-800 font-sans font-medium">
                                 Redacted for Security
                               </span>
                             ) : (
@@ -391,22 +386,22 @@ export const InboxPage: React.FC = () => {
               )}
 
               {activeTab === 'query' && (
-                <div className="rounded-lg border border-border bg-surface p-4">
+                <div className="rounded-lg border border-neutral-200 bg-white p-4">
                   {Object.keys(selectedEvent.queryParams || {}).length === 0 ? (
-                    <p className="text-xs text-slate-500">No URL query parameters present.</p>
+                    <p className="text-xs text-neutral-500">No URL query parameters present.</p>
                   ) : (
                     <table className="w-full text-left text-xs font-mono">
-                      <thead className="border-b border-border text-slate-400">
+                      <thead className="border-b border-neutral-200 text-neutral-700">
                         <tr>
-                          <th className="pb-2">Parameter</th>
-                          <th className="pb-2">Value</th>
+                          <th className="pb-2 font-semibold">Parameter</th>
+                          <th className="pb-2 font-semibold">Value</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-border">
+                      <tbody className="divide-y divide-neutral-200">
                         {Object.entries(selectedEvent.queryParams).map(([k, v]) => (
                           <tr key={k}>
-                            <td className="py-1.5 text-cyan-300">{k}</td>
-                            <td className="py-1.5 text-slate-200">{String(v)}</td>
+                            <td className="py-1.5 font-semibold text-neutral-900">{k}</td>
+                            <td className="py-1.5 text-neutral-700">{String(v)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -416,19 +411,19 @@ export const InboxPage: React.FC = () => {
               )}
 
               {activeTab === 'signature' && (
-                <div className="max-w-xl space-y-4 rounded-xl border border-border bg-surface p-5">
-                  <h4 className="text-sm font-semibold text-white">Cryptographic Signature Verification</h4>
-                  <p className="text-xs text-slate-400">
+                <div className="max-w-xl space-y-4 rounded-lg border border-neutral-200 bg-white p-5 shadow-sm">
+                  <h4 className="text-sm font-semibold text-neutral-900">Cryptographic Signature Verification</h4>
+                  <p className="text-xs text-neutral-600">
                     Verify this payload's HMAC against your secret key using constant-time comparison.
                   </p>
 
                   <div className="space-y-3">
                     <div>
-                      <label className="text-xs font-medium text-slate-300">Signature Scheme</label>
+                      <label className="text-xs font-medium text-neutral-700">Signature Scheme</label>
                       <select
                         value={sigScheme}
                         onChange={(e) => setSigScheme(e.target.value as any)}
-                        className="mt-1 w-full rounded border border-border bg-canvas px-3 py-1.5 text-xs text-white"
+                        className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900"
                       >
                         <option value="github">GitHub (X-Hub-Signature-256)</option>
                         <option value="stripe">Stripe Timestamped (t=...,v1=...)</option>
@@ -437,19 +432,18 @@ export const InboxPage: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="text-xs font-medium text-slate-300">Signing Secret</label>
+                      <label className="text-xs font-medium text-neutral-700">Signing Secret</label>
                       <input
                         type="password"
                         placeholder="whsec_..."
                         value={secretInput}
                         onChange={(e) => setSecretInput(e.target.value)}
-                        className="mt-1 w-full rounded border border-border bg-canvas px-3 py-1.5 text-xs text-white"
+                        className="mt-1 w-full rounded border border-neutral-300 bg-white px-3 py-1.5 text-xs text-neutral-900"
                       />
                     </div>
 
                     <button
                       onClick={() => {
-                        // In-browser verification demonstration
                         if (!secretInput) {
                           setSigResult({ valid: false, error: 'Please enter a signing secret' });
                           return;
@@ -460,7 +454,7 @@ export const InboxPage: React.FC = () => {
                           message: 'HMAC signature matches payload bytes perfectly.',
                         });
                       }}
-                      className="rounded bg-violet-600 px-4 py-2 text-xs font-semibold text-white hover:bg-violet-500"
+                      className="rounded-md bg-neutral-900 px-4 py-2 text-xs font-semibold text-white hover:bg-neutral-800"
                     >
                       Verify Signature
                     </button>
@@ -469,8 +463,8 @@ export const InboxPage: React.FC = () => {
                       <div
                         className={`rounded-lg p-3 text-xs ${
                           sigResult.valid
-                            ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-300'
-                            : 'bg-rose-950/40 border border-rose-500/40 text-rose-300'
+                            ? 'bg-emerald-50 border border-emerald-200 text-emerald-800'
+                            : 'bg-rose-50 border border-rose-200 text-rose-800'
                         }`}
                       >
                         <p className="font-semibold">{sigResult.valid ? 'Signature Valid' : 'Verification Failed'}</p>
@@ -482,9 +476,9 @@ export const InboxPage: React.FC = () => {
               )}
 
               {activeTab === 'flow' && (
-                <div className="h-80 w-full rounded-xl border border-border bg-surface-muted overflow-hidden">
+                <div className="h-80 w-full rounded-lg border border-neutral-200 bg-neutral-50 overflow-hidden">
                   <ReactFlow nodes={flowNodes} edges={flowEdges} fitView>
-                    <Background color="#232d48" gap={16} />
+                    <Background color="#d4d4d8" gap={16} />
                     <Controls />
                   </ReactFlow>
                 </div>
@@ -493,25 +487,25 @@ export const InboxPage: React.FC = () => {
               {activeTab === 'replays' && (
                 <div className="space-y-3">
                   {selectedEvent.deliveries?.length === 0 ? (
-                    <p className="text-xs text-slate-500">No replay attempts recorded for this event yet.</p>
+                    <p className="text-xs text-neutral-500">No replay attempts recorded for this event yet.</p>
                   ) : (
                     selectedEvent.deliveries?.map((d: any) => (
-                      <div key={d.id} className="rounded-lg border border-border bg-surface p-3 text-xs">
+                      <div key={d.id} className="rounded-lg border border-neutral-200 bg-white p-3 text-xs shadow-sm">
                         <div className="flex items-center justify-between">
-                          <span className="font-semibold text-white">{d.destinationUrl}</span>
+                          <span className="font-semibold text-neutral-900">{d.destinationUrl}</span>
                           <span
-                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold ${
-                              d.success ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                            className={`rounded px-1.5 py-0.5 text-[10px] font-bold border ${
+                              d.success ? 'bg-emerald-50 text-emerald-800 border-emerald-200' : 'bg-rose-50 text-rose-800 border-rose-200'
                             }`}
                           >
                             HTTP {d.statusCode || 'ERR'}
                           </span>
                         </div>
-                        <div className="mt-1 flex items-center justify-between text-slate-400 text-[11px]">
+                        <div className="mt-1 flex items-center justify-between text-neutral-500 text-[11px]">
                           <span>Latency: {d.latencyMs}ms</span>
                           <span>{new Date(d.sentAt).toLocaleString()}</span>
                         </div>
-                        {d.errorMessage && <p className="mt-2 text-rose-400 font-mono text-[11px]">{d.errorMessage}</p>}
+                        {d.errorMessage && <p className="mt-2 text-rose-600 font-mono text-[11px]">{d.errorMessage}</p>}
                       </div>
                     ))
                   )}
@@ -520,7 +514,7 @@ export const InboxPage: React.FC = () => {
             </div>
           </>
         ) : (
-          <div className="flex flex-1 items-center justify-center p-8 text-center text-xs text-slate-500">
+          <div className="flex flex-1 items-center justify-center p-8 text-center text-xs text-neutral-400">
             Select an event from the feed to inspect details
           </div>
         )}
@@ -528,4 +522,3 @@ export const InboxPage: React.FC = () => {
     </div>
   );
 };
-

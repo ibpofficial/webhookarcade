@@ -3,24 +3,24 @@
 @tailwind utilities;
 
 :root {
-  --color-canvas: #0a0d14;
-  --color-canvas-subtle: #0e121d;
-  --color-sidebar: #101522;
-  --color-surface: #161c2e;
-  --color-surface-elevated: #1c243b;
-  --color-border: #232d48;
-  --color-primary: #8b5cf6;
-  --color-accent: #06b6d4;
+  --color-canvas: #ffffff;
+  --color-canvas-subtle: #fafafa;
+  --color-sidebar: #fcfcfd;
+  --color-surface: #ffffff;
+  --color-surface-elevated: #ffffff;
+  --color-border: #e2e8f0;
+  --color-primary: #09090b;
+  --color-accent: #18181b;
   --color-on-primary: #ffffff;
-  --color-error: #ef4444;
-  --color-success: #10b981;
-  --color-warning: #f59e0b;
+  --color-error: #dc2626;
+  --color-success: #16a34a;
+  --color-warning: #d97706;
 }
 
 body {
   margin: 0;
   background-color: var(--color-canvas);
-  color: #f1f5f9;
+  color: #09090b;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   overflow-x: hidden;
 }
@@ -34,16 +34,16 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #232d48;
+  background: #cbd5e1;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #37446b;
+  background: #94a3b8;
 }
 
-/* Accessible focus visible rings (Material 3 + Apple HIG standard) */
+/* Accessible focus visible rings */
 *:focus-visible {
-  outline: 2px solid var(--color-primary);
+  outline: 2px solid #09090b;
   outline-offset: 2px;
 }
 
@@ -56,4 +56,3 @@ body {
     scroll-behavior: auto !important;
   }
 }
-
