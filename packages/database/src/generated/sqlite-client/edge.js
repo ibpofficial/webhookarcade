@@ -291,7 +291,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "D:\\metad\\webhook\\webhook-arcade\\packages\\database\\src\\generated\\sqlite-client",
+      "value": "D:\\metad\\webhook\\packages\\database\\src\\generated\\sqlite-client",
       "fromEnvVar": null
     },
     "config": {
@@ -305,7 +305,7 @@ const config = {
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "D:\\metad\\webhook\\webhook-arcade\\packages\\database\\prisma\\schema.sqlite.prisma",
+    "sourceFilePath": "D:\\metad\\webhook\\packages\\database\\prisma\\schema.sqlite.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -318,6 +318,7 @@ const config = {
     "db"
   ],
   "activeProvider": "sqlite",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
